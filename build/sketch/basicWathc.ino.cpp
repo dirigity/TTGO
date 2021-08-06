@@ -438,19 +438,21 @@ void loop()
 
       if (!drawn)
       { // draw corona
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, 0xFFFFFF);
+        // Serial.println("[START] drawing corona");
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, TFT_LIGHTGREY);
         for (int i = 0; i < 12; i++)
         {
           double angle = 2 * PI / 12 * i;
-          ttgo->tft->drawLine(0, 0, h * sin(angle), h  * cos(angle), 0x000000);
+          ttgo->tft->drawLine(w / 2, h / 2, w / 2 + double(h) * sin(angle), h / 2 + double(h) * cos(angle), 0x000000);
+          // Serial.println(double(h) * sin(angle));
         }
         ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
+        // Serial.println("[DONE] drawing corona");
       }
 
       double secondAngle = double(seconds) / 60. * 2. * PI;
       double minuteAngle = double(minute) / 60. * 2. * PI + secondAngle / 60.;
       double hourAngle = double(hour) / 12. * 2. * PI + minuteAngle / 60.;
-
       double battAngle = ttgo->power->getBattPercentage() / 100. * 2. * PI;
 
       for (int i = 0; i < 200; i++)
