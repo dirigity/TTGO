@@ -10,27 +10,28 @@
 
 
 
-const double ANGLE_TO_COLOR = 1 / (2 * 3.1415926535897932384626433832795) * 32;
-
 TTGOClass *ttgo;
 
 const int SleepingHours = 10;
 const int timeToSleep = 23;
 const int timeToWakeUp = 9;
 
-// const double secondsMstart = 0.2;
-// const double secondsMend = 0.4;
-// const double minuteMstart = 0.4;
-// const double minuteMend = 0.7;
-// const double hourMstart = 0.7;
-// const double hourMend = 1;
+const double secondsMstart = .2;
+const double secondsMend = .35;
 
-const double secondsMstart = 0.7;
-const double secondsMend = 1;
-const double minuteMstart = 0.4;
-const double minuteMend = 0.7;
-const double hourMstart = 0.2;
-const double hourMend = 0.4;
+const double minuteMstart = .4;
+const double minuteMend = .55;
+
+const double hourMstart = .6;
+const double hourMend = .8;
+
+const double battMstart = .85;
+const double battMend = .95;
+
+const double ringMstart = .95;
+const double ringMend = 1;
+
+// calculations
 
 const double midSecondsM = (secondsMstart + secondsMend) / 2;
 const double secondsMThickness = secondsMend - secondsMstart;
@@ -41,8 +42,12 @@ const double minuteMThickness = minuteMend - minuteMstart;
 const double midHourM = (hourMstart + hourMend) / 2;
 const double hourMThickness = hourMend - hourMstart;
 
+const double midBattM = (battMstart + battMend) / 2;
+const double battMThickness = battMend - battMstart;
+
 int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
+int planedButtonCoolDown = 0;
 int w, h;
 
 typedef enum
@@ -110,7 +115,7 @@ tApp app = watch;
 
 unsigned long createRGB(int r, int g, int b)
 {
-  return ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff);
+  return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
 }
 
 bool drawn = false;
@@ -160,6 +165,7 @@ void setup()
   ttgo->power->clearIRQ();
 
   interaction();
+  planedButtonCoolDown = getUsableTime() + 5;
   drawn = false;
 
   Serial.printf("Setup done!! \n");
@@ -182,11 +188,11 @@ void enterDeepSleep()
 
   if (!asleep(hour + 1))
   { // wake up next hour o'Clock
-    waitTime = ((60 - minute) * 60 - 15);
+    waitTime = ((60 - minute) * 60 - 60);
   }
   else
   { // wake up tomorrow
-    waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 15);
+    waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
   }
 
   Serial.printf("Saldre del deep sleep %u \n", waitTime);
@@ -265,31 +271,32 @@ int getUsableTime()
 void interaction()
 {
   int time = getUsableTime();
-  planedScreenSleepTime = time + 15;
-  planedDeepSleepTime = time + 30;
+  planedScreenSleepTime = time + 30;
+  planedDeepSleepTime = time + 45;
 }
 
 void drawPolarSegment(double angle, double startM, double endM, int col)
 {
-  int a = w / 2 + sin(angle) * startM;
-  int b = h / 2 - cos(angle) * startM;
-  int c = w / 2 + sin(angle) * endM;
-  int d = h / 2 - cos(angle) * endM;
+  int x0 = w / 2 + sin(angle) * startM;
+  int y0 = h / 2 - cos(angle) * startM;
+  int x1 = w / 2 + sin(angle) * endM;
+  int y1 = h / 2 - cos(angle) * endM;
 
-  ttgo->tft->drawLine(a, b, c, d, col);
+  ttgo->tft->drawLine(x0, y0, x1, y1, col);
+  ttgo->tft->drawLine(x0 + 1, y0, x1 + 1, y1, col);
+  ttgo->tft->drawLine(x0, y0 + 1, x1, y1 + 1, col);
+  //ttgo->tft->drawLine(x0, y0, x1, y1, col);
 
-  ttgo->tft->drawLine(a + 1, b, c + 1, d, col);
+  // int x0_ = x0 + (x0 < x1 ? 1: -1);
+  // int x1_ = x1 + (x1 < x0 ? 1: -1);
 
-  ttgo->tft->drawLine(a - 1, b, c - 1, d, col);
+  // ttgo->tft->drawLine(x0_, y0, x1_, y1, col);
 
-  ttgo->tft->drawLine(a, b + 1, c, d + 1, col);
+  // int y0_ = y0 + (y0 < y1 ? 1 : -1);
+  // int y1_ = y1 + (y1 < y0 ? 1 : -1);
 
-  ttgo->tft->drawLine(a, b - 1, c, d - 1, col);
+  // ttgo->tft->drawLine(x0, y0_, x1, y1_, col);
 }
-
-double i = 0;
-
-double clockAngle = 0;
 
 double angle(double a)
 {
@@ -306,7 +313,6 @@ double angle(double a)
 
 double CapRoundness(double in)
 {
-  Serial.println(in);
   if (in < 30)
   {
     return 1;
@@ -319,15 +325,19 @@ double CapRoundness(double in)
   }
 }
 
-void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness)
+void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
 {
-  double Intensity = angle(clockAngle - timeAngle) * ANGLE_TO_COLOR;
-  double CurrentCapRoundness = CapRoundness(Intensity);
-  // Serial.println(CapRoundness);
+  double Intensity = angle(clockAngle - timeAngle) / (2 * 3.1415926535897932384626433832795);
+  double CurrentCapRoundness = CapRoundness(Intensity * 32);
   double Mstart_ = midsM - MThickness / 2 * CurrentCapRoundness;
   double Mend_ = midsM + MThickness / 2 * CurrentCapRoundness;
-  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(0, 0, Intensity));
+  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b));
 }
+
+double secondDrawingAngle = 0;
+double minuteDrawingAngle = 0;
+double hourDrawingAngle = 0;
+double battDrawingAngle = 0;
 
 void loop()
 {
@@ -340,9 +350,13 @@ void loop()
     case none:
       break;
     case button:
-      Serial.printf("click \n");
-      interaction();
-      ToggleOnOff();
+      if (planedButtonCoolDown < UsableTime)
+      {
+        Serial.printf("click \n");
+        interaction();
+        ToggleOnOff();
+      }
+
       break;
     }
 
@@ -388,80 +402,52 @@ void loop()
 
     case watch:
 
-      double seccondAngle = double(seconds) / 60. * 2. * 3.1415926535897932384626433832795;
-      double minuteAngle = double(minute) / 60. * 2. * 3.1415926535897932384626433832795 + seccondAngle / 60.;
+      if (!drawn)
+      { // draw corona
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, 0xFFFFFF);
+        for (int i = 0; i < 12; i++)
+        {
+          double angle = 2 * 3.1415926535897932384626433832795 / 12 * i;
+          ttgo->tft->drawLine(0, 0, h * sin(angle), h * cos(angle), 0x000000);
+        }
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
+      }
+
+      double secondAngle = double(seconds) / 60. * 2. * 3.1415926535897932384626433832795;
+      double minuteAngle = double(minute) / 60. * 2. * 3.1415926535897932384626433832795 + secondAngle / 60.;
       double hourAngle = double(hour) / 12. * 2. * 3.1415926535897932384626433832795 + minuteAngle / 60.;
 
-      //hour, minute, seconds
-      // Serial.println(seconds);
-      // Serial.println(seccondAngle);
+      double battAngle = ttgo->power->getBattPercentage() / 100. * 2. * 3.1415926535897932384626433832795;
 
-      // Serial.println(minute);
-      // Serial.println(minuteAngle);
-
-      // Serial.println(hour);
-      // Serial.println(hourAngle);
-      // Serial.println("---------");
-      //int fullBlue = createRGB(0, 0, 31);
-
-      // int a_ = w / 2 + w / 2 * sin(seccondAngle) * ((secondsMstart + secondsMend) / 2.);
-      // int b_ = h / 2. - h / 2 * cos(seccondAngle) * ((secondsMstart + secondsMend) / 2.);
-      // int c_ = h / 4 * (secondsMend - secondsMstart) - 1;
-
-      // int d_ = w / 2 + w / 2 * sin(minuteAngle) * ((minuteMstart + minuteMend) / 2.);
-      // int e_ = h / 2. - h / 2 * cos(minuteAngle) * ((minuteMstart + minuteMend) / 2.);
-      // int f_ = h / 4 * (minuteMend - minuteMstart) - 1;
-
-      // int g_ = w / 2 + w / 2 * sin(hourAngle) * ((hourMstart + hourMend) / 2.);
-      // int h_ = h / 2. - h / 2 * cos(hourAngle) * ((hourMstart + hourMend) / 2.);
-      // int i_ = h / 4 * (hourMend - hourMstart) - 1;
-
-      for (int j = 0; j < 10 || !drawn; j++)
+      for (int i = 0; i < 200; i++)
       {
-        clockAngle += 0.01112345678;
-
-        clockAngle = angle(clockAngle);
-
-        if (j > 700)
-        {
-          drawn = true;
-        }
-
-        manageDisc(clockAngle, seccondAngle, midSecondsM, secondsMThickness);
-        manageDisc(clockAngle, minuteAngle, midMinuteM, minuteMThickness);
-        manageDisc(clockAngle, hourAngle, midHourM, hourMThickness);
-
-        // double secondIntensity = angle(clockAngle - seccondAngle) * ANGLE_TO_COLOR;
-        // double secondCapRoundness = CapRoundness(secondIntensity);
-        // // Serial.println(secondCapRoundness);
-        // double secondsMstart_ = midSecondsM - secondsMThickness / 2 * secondCapRoundness;
-        // double secondsMend_ = midSecondsM + secondsMThickness / 2 * secondCapRoundness;
-
-        // double minuteIntensity = angle(clockAngle - minuteAngle) * ANGLE_TO_COLOR;
-        // double minuteCapRoundness = CapRoundness(minuteIntensity);
-        // double minuteMstart_ = midMinuteM - minuteMThickness / 2 * minuteCapRoundness;
-        // double minuteMend_ = midMinuteM + minuteMThickness / 2 * minuteCapRoundness;
-
-        // double hourIntensity = angle(clockAngle - hourAngle) * ANGLE_TO_COLOR;
-        // double hourCapRoundness = CapRoundness(hourIntensity);
-        // double hourMstart_ = midHourM - hourMThickness / 2 * hourCapRoundness;
-        // double hourMend_ = midHourM + hourMThickness / 2 * hourCapRoundness;
-
-        // drawPolarSegment(clockAngle, h / 2 * secondsMstart_, h / 2 * secondsMend_, createRGB(0, 0, secondIntensity));
-        // drawPolarSegment(clockAngle, h / 2 * minuteMstart_, h / 2 * minuteMend_, createRGB(0, 0, minuteIntensity));
-        // drawPolarSegment(clockAngle, h / 2 * hourMstart_, h / 2 * hourMend_, createRGB(0, 0, hourIntensity));
-
-        // ttgo->tft->fillCircle(a_, b_, c_, fullBlue);
-        // ttgo->tft->fillCircle(d_, e_, f_, fullBlue);
-        // ttgo->tft->fillCircle(g_, h_, i_, fullBlue);
-
-        // int a = w / 2 + sin(angle) * startM;
-        // int b = h / 2 - cos(angle) * startM;
-        // int c = w / 2 + sin(angle) * endM;
-        // int d = h / 2 - cos(angle) * endM;
-
-        // ttgo->tft->drawLine(a, b, c, d, col);
+        secondDrawingAngle += 0.03123123;
+        secondDrawingAngle = angle(secondDrawingAngle);
+        manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 3, 3, 31);
       }
+
+      for (int i = 0; i < (drawn ? 40 : 400); i++)
+      {
+        minuteDrawingAngle += 0.01123123;
+        minuteDrawingAngle = angle(minuteDrawingAngle);
+        manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 3, 3, 31);
+      }
+
+      for (int i = 0; i < (drawn ? 40 : 700); i++)
+      {
+        hourDrawingAngle += 0.01123123;
+        hourDrawingAngle = angle(hourDrawingAngle);
+        manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 3, 3, 31);
+      }
+
+      for (int i = 0; i < (drawn ? 40 : 700); i++)
+      {
+        battDrawingAngle += 0.01123123;
+        battDrawingAngle = angle(battDrawingAngle);
+        manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 3, 3, 31);
+      }
+
+      drawn = true;
 
       break;
     }
