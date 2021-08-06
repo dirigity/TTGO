@@ -15,20 +15,20 @@ const int SleepingHours = 10;
 const int timeToSleep = 23;
 const int timeToWakeUp = 9;
 
-const double secondsMstart = .2;
-const double secondsMend = .35;
+const double secondsMstart = .15;
+const double secondsMend = .3;
 
-const double minuteMstart = .4;
-const double minuteMend = .55;
+const double minuteMstart = .35;
+const double minuteMend = .5;
 
-const double hourMstart = .6;
-const double hourMend = .8;
+const double hourMstart = .55;
+const double hourMend = .75;
 
-const double battMstart = .85;
-const double battMend = .95;
+const double battMstart = .8;
+const double battMend = .9;
 
 const double ringMstart = .95;
-const double ringMend = 1;
+const double ringMend = .99;
 
 // calculations
 
@@ -112,8 +112,10 @@ typedef enum
 } tApp;
 tApp app = watch;
 
-unsigned long createRGB(int r, int g, int b)
+int createRGB(int r, int g, int b)
 {
+
+  return ttgo->tft->color565(r, g, b);
   return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
 }
 
@@ -235,6 +237,7 @@ void ToggleOnOff()
     if (ttgo->bl->isOn())
     {
       setCpuFrequencyMhz(240);
+      planedButtonCoolDown = getUsableTime() + 5;
       drawn = false;
     }
     else
@@ -310,24 +313,34 @@ double angle(double a)
   return a;
 }
 
-double CapRoundness(double in)
+double capRoundFunctionCeroToOne(double i)
 {
-  if (in < 30)
+  return sqrt(1 - (i * i));
+}
+
+double CapRoundness(double in, double midRad, double Thickness)
+{
+
+  double perimeter = 2 * PI * midRad;
+  double perimeterRadiousRelation = 1 - (Thickness / perimeter);
+
+  if (in < perimeterRadiousRelation)
   {
     return 1;
   }
   else
   {
-    double i = (in - 30) / 2;
+    //return .5;
+    double i = (in - perimeterRadiousRelation) / (Thickness / perimeter);
 
-    return sqrt(1 - (i * i));
+    return capRoundFunctionCeroToOne(i);
   }
 }
 
 void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
 {
   double Intensity = angle(clockAngle - timeAngle) / (2 * PI);
-  double CurrentCapRoundness = CapRoundness(Intensity * 32);
+  double CurrentCapRoundness = CapRoundness(Intensity, midsM, MThickness);
   double Mstart_ = midsM - MThickness / 2 * CurrentCapRoundness;
   double Mend_ = midsM + MThickness / 2 * CurrentCapRoundness;
   drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b));
@@ -400,20 +413,29 @@ void loop()
       break;
 
     case watch:
-
+      // draw corona
       if (!drawn)
-      { // draw corona
+      {
         // Serial.println("[START] drawing corona");
         int ringMmid = (ringMend + ringMstart) / 2 * h / 2;
 
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, TFT_LIGHTGREY);
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(20, 20, 20));
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
+
+        for (int i = 0; i < 60; i++)
+        {
+          double angle = 2 * PI / 60 * i;
+          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 2, 0x000000);
+          // Serial.println(double(h) * sin(angle));
+        }
+
         for (int i = 0; i < 12; i++)
         {
           double angle = 2 * PI / 12 * i;
-          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 10, 0x000000);
+          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(50, 50, 50));
           // Serial.println(double(h) * sin(angle));
         }
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
+
         // Serial.println("[DONE] drawing corona");
       }
 
@@ -426,28 +448,31 @@ void loop()
       {
         secondDrawingAngle += 0.03123123;
         secondDrawingAngle = angle(secondDrawingAngle);
-        manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 3, 3, 31);
+        manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 0, 0, 255);
       }
 
-      for (int i = 0; i < (drawn ? 40 : 400); i++)
+      for (int i = 0; i < (drawn ? 40 : 300); i++)
       {
-        minuteDrawingAngle += 0.01123123;
+        minuteDrawingAngle += 0.02123123;
         minuteDrawingAngle = angle(minuteDrawingAngle);
-        manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 3, 3, 31);
+        manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 0, 0, 255);
       }
 
       for (int i = 0; i < (drawn ? 40 : 700); i++)
       {
         hourDrawingAngle += 0.01123123;
         hourDrawingAngle = angle(hourDrawingAngle);
-        manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 3, 3, 31);
+        manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 0, 0, 255);
       }
 
       for (int i = 0; i < (drawn ? 40 : 700); i++)
       {
         battDrawingAngle += 0.01123123;
         battDrawingAngle = angle(battDrawingAngle);
-        manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 3, 3, 31);
+        if (battAngle < 1)
+          manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 255, 0, 0);
+        else
+          manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 0, 0, 255);
       }
 
       drawn = true;
