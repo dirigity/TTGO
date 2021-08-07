@@ -1,4 +1,4 @@
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWathc\\basicWathc.ino"
+# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 // Must be defined before include LilyGoWatch librarie
 // Uncomment the line corresponding your T-Watch
 // #define LILYGO_WATCH_2019_WITH_TOUCH     // To use T-Watch2019 with touchscreen, please uncomment this line
@@ -6,7 +6,7 @@
 
 
 
-# 9 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWathc\\basicWathc.ino" 2
+# 9 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino" 2
 
 
 
@@ -117,7 +117,7 @@ int createRGB(int r, int g, int b)
 {
 
   return ttgo->tft->color565(r, g, b);
-  return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
+  //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
 }
 
 bool drawn = false;
@@ -130,6 +130,7 @@ void setup()
   // Get Watch object and set up the display
   ttgo = TTGOClass::getWatch();
   ttgo->begin();
+  ttgo->motor_begin();
   ttgo->openBL();
 
   ttgo->bma->enableAccel();
@@ -255,13 +256,16 @@ void ToggleOnOff()
 
 void carillon(int h)
 {
-  while (h != 0)
+  while (h > 0)
   {
+
+    Serial.println(h);
+
     h--;
     ttgo->motor->onec(1000);
     delay(1000);
+    interaction();
   }
-  interaction();
 }
 
 int getUsableTime()
@@ -278,7 +282,7 @@ void interaction()
   planedDeepSleepTime = time + 45;
 }
 
-void drawPolarSegment(double angle, double startM, double endM, int col)
+void drawPolarSegment(double angle, double startM, double endM, int col) //, int darkerCol)
 {
   int x0 = w / 2 + sin(angle) * startM;
   int y0 = h / 2 - cos(angle) * startM;
@@ -288,6 +292,21 @@ void drawPolarSegment(double angle, double startM, double endM, int col)
   ttgo->tft->drawLine(x0, y0, x1, y1, col);
   ttgo->tft->drawLine(x0 + 1, y0, x1 + 1, y1, col);
   ttgo->tft->drawLine(x0, y0 + 1, x1, y1 + 1, col);
+
+  // const double ditheringStripes = 5.;
+  // const double dithering = .5; // debug thing, leave at 1
+
+  // if (col != darkerCol)
+  //   for (double i = .5 + sin(angle * 12345.5678) / 2; i < ditheringStripes * dithering; i++)
+  //   {
+  //     double m = startM + ((endM - startM) * i / ditheringStripes);
+  //     int x = w / 2 + sin(angle) * m;
+  //     int y = h / 2 - cos(angle) * m;
+  //     ttgo->tft->drawPixel(x, y, darkerCol);
+  //     ttgo->tft->drawPixel(x + 1, y, darkerCol);
+  //     ttgo->tft->drawPixel(x, y + 1, darkerCol);
+  //   }
+
   //ttgo->tft->drawLine(x0, y0, x1, y1, col);
 
   // int x0_ = x0 + (x0 < x1 ? 1: -1);
@@ -338,19 +357,43 @@ double CapRoundness(double in, double midRad, double Thickness)
   }
 }
 
+double max(double a, double b)
+{
+  return a > b ? a : b;
+}
+
 void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
 {
   double Intensity = angle(clockAngle - timeAngle) / (2 * 3.1415926535897932384626433832795);
+  //double Intensity_ = max(0., Intensity - 0.01);
   double CurrentCapRoundness = CapRoundness(Intensity, midsM, MThickness);
   double Mstart_ = midsM - MThickness / 2 * CurrentCapRoundness;
   double Mend_ = midsM + MThickness / 2 * CurrentCapRoundness;
-  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b));
+
+  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b)); //, createRGB(Intensity_ * r, Intensity_ * g, Intensity_ * b));
 }
 
 double secondDrawingAngle = 0;
 double minuteDrawingAngle = 0;
 double hourDrawingAngle = 0;
 double battDrawingAngle = 0;
+
+double battAngle = 0;
+
+int startClickX = -1;
+int startClickY = -1;
+
+bool finguerDown = false;
+
+void onFinguerDown()
+{
+  Serial.println("finguer down");
+}
+
+void onFinguerUp()
+{
+  Serial.println("finguer up");
+}
 
 void loop()
 {
@@ -384,21 +427,23 @@ void loop()
     {
       interaction();
       Serial.printf("x: %u, y: %u \n", touchX, touchY);
-    }
-  }
-  // sleep after some time without activity;
-  {
-    if (planedScreenSleepTime < UsableTime)
-    {
-      ttgo->bl->off();
-      setCpuFrequencyMhz(2);
-    }
 
-    if (planedDeepSleepTime < UsableTime)
-    { // 30s despues de apagar la pantalla entrar en sueño profundo
-      enterDeepSleep();
+      if (!finguerDown)
+      {
+        onFinguerDown();
+        finguerDown = true;
+      }
+    }
+    else
+    {
+      if (finguerDown)
+      {
+        finguerDown = false;
+        onFinguerUp();
+      }
     }
   }
+
   // app managing and ploting
   if (ttgo->bl->isOn())
   {
@@ -414,13 +459,28 @@ void loop()
       break;
 
     case watch:
+
+      // sleep after some time without activity;
+      {
+        if (planedScreenSleepTime < UsableTime)
+        {
+          ttgo->bl->off();
+          setCpuFrequencyMhz(2);
+        }
+
+        if (planedDeepSleepTime < UsableTime)
+        { // 30s despues de apagar la pantalla entrar en sueño profundo
+          enterDeepSleep();
+        }
+      }
+
       // draw corona
       if (!drawn)
       {
         // Serial.println("[START] drawing corona");
         int ringMmid = (ringMend + ringMstart) / 2 * h / 2;
 
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(20, 20, 20));
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(50, 50, 50));
         ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
 
         for (int i = 0; i < 60; i++)
@@ -433,7 +493,11 @@ void loop()
         for (int i = 0; i < 12; i++)
         {
           double angle = 2 * 3.1415926535897932384626433832795 / 12 * i;
-          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(50, 50, 50));
+          if (i % 3 == 0)
+            ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(200, 200, 200));
+          else
+            ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(150, 150, 150));
+
           // Serial.println(double(h) * sin(angle));
         }
 
@@ -442,38 +506,48 @@ void loop()
 
       double secondAngle = double(seconds) / 60. * 2. * 3.1415926535897932384626433832795;
       double minuteAngle = double(minute) / 60. * 2. * 3.1415926535897932384626433832795 + secondAngle / 60.;
-      double hourAngle = double(hour) / 12. * 2. * 3.1415926535897932384626433832795 + minuteAngle / 60.;
-      double battAngle = ttgo->power->getBattPercentage() / 100. * 2. * 3.1415926535897932384626433832795;
-
-      for (int i = 0; i < 200; i++)
+      double hourAngle = double(hour) / 12. * 2. * 3.1415926535897932384626433832795 + minuteAngle / 12.;
+      if (battAngle == 0)
       {
-        secondDrawingAngle += 0.03123123;
-        secondDrawingAngle = angle(secondDrawingAngle);
-        manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 0, 0, 255);
+        battAngle = (ttgo->power->getBattPercentage() / 100. * 2. * 3.1415926535897932384626433832795);
+      }
+      else
+      {
+        battAngle = battAngle * 0.95 + (ttgo->power->getBattPercentage() / 100. * 2. * 3.1415926535897932384626433832795) * 0.05;
       }
 
-      for (int i = 0; i < (drawn ? 40 : 300); i++)
+      // draw gradient circles
       {
-        minuteDrawingAngle += 0.02123123;
-        minuteDrawingAngle = angle(minuteDrawingAngle);
-        manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 0, 0, 255);
-      }
+        for (int i = 0; i < 200; i++)
+        {
+          secondDrawingAngle += 0.03123123;
+          secondDrawingAngle = angle(secondDrawingAngle);
+          manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 0, 0, 255);
+        }
 
-      for (int i = 0; i < (drawn ? 40 : 700); i++)
-      {
-        hourDrawingAngle += 0.01123123;
-        hourDrawingAngle = angle(hourDrawingAngle);
-        manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 0, 0, 255);
-      }
+        for (int i = 0; i < (drawn ? 40 : 300); i++)
+        {
+          minuteDrawingAngle += 0.02123123;
+          minuteDrawingAngle = angle(minuteDrawingAngle);
+          manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 0, 0, 255);
+        }
 
-      for (int i = 0; i < (drawn ? 40 : 700); i++)
-      {
-        battDrawingAngle += 0.01123123;
-        battDrawingAngle = angle(battDrawingAngle);
-        if (battAngle < 1)
-          manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 255, 0, 0);
-        else
-          manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 0, 0, 255);
+        for (int i = 0; i < (drawn ? 40 : 700); i++)
+        {
+          hourDrawingAngle += 0.01123123;
+          hourDrawingAngle = angle(hourDrawingAngle);
+          manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 0, 0, 255);
+        }
+
+        for (int i = 0; i < (drawn ? 40 : 700); i++)
+        {
+          battDrawingAngle += 0.01123123;
+          battDrawingAngle = angle(battDrawingAngle);
+          if (battAngle < 1)
+            manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 255, 0, 0);
+          else
+            manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 0, 0, 255);
+        }
       }
 
       drawn = true;
@@ -489,9 +563,18 @@ void loop()
     interaction();
   }
 
-  if (minute == 0 && seconds == 0)
+  if (seconds % 20 == 0)
   {
-    carillon(hour);
+    int dongs = hour;
+    if (dongs > 13)
+    {
+      dongs -= 12;
+    }
+    if (dongs == 0)
+    {
+      dongs = 12;
+    }
+    carillon(dongs);
   }
 
   //Serial.printf(ttgo->rtc->formatDateTime(PCF_TIMEFORMAT_HMS));
