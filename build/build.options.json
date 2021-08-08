@@ -1,5 +1,5 @@
 {
-  "additionalFiles": "",
+  "additionalFiles": "..",
   "builtInLibrariesFolders": "C:\\Program Files (x86)\\Arduino\\libraries",
   "builtInToolsFolders": "C:\\Program Files (x86)\\Arduino\\tools-builder,C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr,C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages",
   "compiler.optimization_flags": "",
@@ -8,5 +8,5 @@
   "hardwareFolders": "C:\\Program Files (x86)\\Arduino\\hardware,C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages",
   "otherLibrariesFolders": "C:\\Users\\Jaime\\Documents\\Arduino\\libraries",
   "runtime.ide.version": "10815",
-  "sketchLocation": "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+  "sketchLocation": "c:\\Users\\Jaime\\Desktop\\TTGO\\lvglTest\\lvglTest.ino"
 }

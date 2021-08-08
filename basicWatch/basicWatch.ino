@@ -4,12 +4,16 @@
 // #define LILYGO_WATCH_2019_NO_TOUCH    // To use T-Watch2019 Not touchscreen , please uncomment this line
 #define LILYGO_WATCH_2020_V1 //To use T-Watch2020, please uncomment this line
 #define LILYGO_WATCH_HAS_MOTOR
+#define LILYGO_WATCH_LVGL
 
 #include <LilyGoWatch.h>
+#include "RickAstley.c"
 
 #define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
 
 TTGOClass *ttgo;
+
+LV_IMG_DECLARE(RickAstley);
 
 const int SleepingHours = 10;
 const int timeToSleep = 23;
@@ -140,11 +144,12 @@ void setup()
   ttgo = TTGOClass::getWatch();
   ttgo->begin();
   ttgo->motor_begin();
+  ttgo->lvgl_begin();
   ttgo->openBL();
 
-  ttgo->bma->enableAccel();
+  //ttgo->bma->enableAccel();
   ttgo->bma->enableWakeupInterrupt();
-  ttgo->bma->enableTiltInterrupt();
+  //ttgo->bma->enableTiltInterrupt();
   // variable initialitation
 
   w = ttgo->tft->width();
