@@ -109,7 +109,17 @@ typedef enum
 {
   laucher,
   flashLight,
-  watch
+  watch,
+  calculator,
+  countdown,
+  timer,
+  teamScores,
+  paint,
+  controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
+  unitConversor,
+  desmos,
+  textNotes, // lista de puntos en rtc_mem
+
 } tApp;
 tApp app = watch;
 
@@ -230,6 +240,10 @@ void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
 
 void ToggleOnOff()
 {
+
+  drawn = false;
+  app = watch;
+
   ttgo->power->readIRQ();
   if (ttgo->power->isPEKShortPressIRQ())
   { // if short click turn off screen
@@ -240,11 +254,11 @@ void ToggleOnOff()
     {
       setCpuFrequencyMhz(240);
       planedButtonCoolDown = getUsableTime() + 5;
-      drawn = false;
+
     }
     else
     {
-      setCpuFrequencyMhz(2);
+      setCpuFrequencyMhz(24);
     }
   }
   else
@@ -258,14 +272,13 @@ void carillon(int h)
 {
   while (h > 0)
   {
-
-    Serial.println(h);
+    //Serial.println(h);
 
     h--;
-    ttgo->motor->onec(1000);
-    delay(1000);
-    interaction();
+    ttgo->motor->onec(100);
+    delay(400);
   }
+  interaction();
 }
 
 int getUsableTime()
@@ -292,32 +305,6 @@ void drawPolarSegment(double angle, double startM, double endM, int col) //, int
   ttgo->tft->drawLine(x0, y0, x1, y1, col);
   ttgo->tft->drawLine(x0 + 1, y0, x1 + 1, y1, col);
   ttgo->tft->drawLine(x0, y0 + 1, x1, y1 + 1, col);
-
-  // const double ditheringStripes = 5.;
-  // const double dithering = .5; // debug thing, leave at 1
-
-  // if (col != darkerCol)
-  //   for (double i = .5 + sin(angle * 12345.5678) / 2; i < ditheringStripes * dithering; i++)
-  //   {
-  //     double m = startM + ((endM - startM) * i / ditheringStripes);
-  //     int x = w / 2 + sin(angle) * m;
-  //     int y = h / 2 - cos(angle) * m;
-  //     ttgo->tft->drawPixel(x, y, darkerCol);
-  //     ttgo->tft->drawPixel(x + 1, y, darkerCol);
-  //     ttgo->tft->drawPixel(x, y + 1, darkerCol);
-  //   }
-
-  //ttgo->tft->drawLine(x0, y0, x1, y1, col);
-
-  // int x0_ = x0 + (x0 < x1 ? 1: -1);
-  // int x1_ = x1 + (x1 < x0 ? 1: -1);
-
-  // ttgo->tft->drawLine(x0_, y0, x1_, y1, col);
-
-  // int y0_ = y0 + (y0 < y1 ? 1 : -1);
-  // int y1_ = y1 + (y1 < y0 ? 1 : -1);
-
-  // ttgo->tft->drawLine(x0, y0_, x1, y1_, col);
 }
 
 double angle(double a)
@@ -383,16 +370,29 @@ double battAngle = 0;
 int startClickX = -1;
 int startClickY = -1;
 
-bool finguerDown = false;
+int lastTouchX = -1;
+int lastTouchY = -1;
 
-void onFinguerDown()
+bool fingerDown = false;
+
+void onfingerDown(int x, int y)
 {
-  Serial.println("finguer down");
+  Serial.printf("finger down x: %d y:%d \n", x, y);
+  startClickX = x;
+  startClickY = y;
 }
 
-void onFinguerUp()
+void onfingerUp(int x, int y)
 {
-  Serial.println("finguer up");
+
+  //Serial.printf("finger up x: %d y:%d \n", x, y);
+  //Serial.printf("vertical distance entre touches: %d \n ", y-startClickY);
+  if (y-startClickY > 80)
+  {
+    app = laucher;
+    //Serial.println("ahora estamos en el laucher");
+    drawn = false;
+  }
 }
 
 void loop()
@@ -425,21 +425,24 @@ void loop()
     bool touching = ttgo->getTouch(touchX, touchY);
     if (touching)
     {
-      interaction();
-      Serial.printf("x: %u, y: %u \n", touchX, touchY);
+      lastTouchX = touchX;
+      lastTouchY = touchY;
 
-      if (!finguerDown)
+      interaction();
+      //Serial.printf("x: %u, y: %u \n", touchX, touchY);
+
+      if (!fingerDown)
       {
-        onFinguerDown();
-        finguerDown = true;
+        onfingerDown(touchX, touchY);
+        fingerDown = true;
       }
     }
     else
     {
-      if (finguerDown)
+      if (fingerDown)
       {
-        finguerDown = false;
-        onFinguerUp();
+        fingerDown = false;
+        onfingerUp(lastTouchX, lastTouchY);
       }
     }
   }
@@ -447,14 +450,15 @@ void loop()
   // app managing and ploting
   if (ttgo->bl->isOn())
   {
+
+    if(!drawn){
+      ttgo->tft->fillScreen(0);
+    }
+
     switch (app)
     {
     case laucher:
 
-      // batteryLevel
-      // time
-      // steps??
-      // notifications maybe kind of probably???
 
       break;
 
@@ -563,7 +567,7 @@ void loop()
     interaction();
   }
 
-  if (seconds % 20 == 0)
+  if (seconds == 0 && minute == 0)
   {
     int dongs = hour;
     if (dongs > 13)
