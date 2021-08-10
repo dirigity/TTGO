@@ -53,10 +53,13 @@ int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
 int w, h;
 
-const int MaxBrigtness = 255;
+const int MaxBrightness = 255;
+const int MinBrightness = 10;
+const int brightnessBarMargin = 10;
+
 struct tPermanent
 {
-  int brigtness = 255;
+  int brightness = 255;
   bool carillon = true;
 };
 
@@ -137,8 +140,8 @@ tApp app = watch;
 int const appCount = 10;
 
 const String AppToString[appCount] = {"launcher",
-                                      "watch",
 
+                                      "watch",
                                       "flashLight",
                                       "calculator",
                                       "countdown",
@@ -295,15 +298,34 @@ void ToggleOnOff()
 
 void carillon(int h)
 {
+  if (!permanent.carillon)
+    return;
   ttgo->motor->onec(300);
   delay(1000);
+  // base 1
+  //while (h > 0)
+  // {
+  //   //Serial.println(h);
+
+  //   h--;
+  //   ttgo->motor->onec(100);
+  //   delay(400);
+  // }
+  // base 2
+
   while (h > 0)
   {
-    //Serial.println(h);
-
-    h--;
-    ttgo->motor->onec(100);
-    delay(400);
+    if (h % 2 == 1)
+    {
+      ttgo->motor->onec(300);
+      delay(400);
+    }
+    else
+    {
+      ttgo->motor->onec(100);
+      delay(400);
+    }
+    h /= 2;
   }
   interaction();
 }
@@ -428,12 +450,30 @@ void onfingerDrag(int x, int y)
 
     touchY = minimum(maximum(0., touchY), double(h - 1));
     //Serial.println(touchY);
-    int newSelected = int(touchY / double(h) * (appCount - 2));
+    int newSelected = int(touchY / double(h) * (appCount - 1));
     if (selected != newSelected)
     {
       selected = newSelected;
       drawn = false;
       Serial.printf("current selection is %d \n", selected);
+    }
+  }
+  if (app == controlPannel)
+  {
+    if (y > 40 && y < 100)
+    {
+      double normalizedPress = double(x - brightnessBarMargin) / double(w - brightnessBarMargin * 2);
+
+      normalizedPress = minimum(maximum(normalizedPress, 0.), 1.);
+
+      int newValue = MinBrightness + (MaxBrightness - MinBrightness) * normalizedPress;
+      //Serial.println(newValue);
+
+      if (permanent.brightness != newValue)
+      {
+        permanent.brightness = newValue;
+        drawn = false;
+      }
     }
   }
 }
@@ -466,15 +506,28 @@ void onfingerUp(int x, int y)
     app = launcher;
     drawn = false;
     selected = -1;
-    ttgo->bl->adjust(permanent.brigtness);
+    ttgo->bl->adjust(permanent.brightness);
     return;
   }
   if (app == launcher && selected >= 0)
   {
-    app = tApp(selected + 2);
+    app = tApp(selected + 1);
     Serial.printf("Cambiando a app: %s \n", AppToString[app].c_str());
+    selected = -1;
     drawn = false;
     return;
+  }
+  if (app == controlPannel)
+  {
+    if (y < 40)
+    {
+      permanent.carillon = !permanent.carillon;
+      drawn = false;
+    }
+    if( y > 100){
+      app = launcher;
+      drawn = false;
+    }
   }
 }
 
@@ -490,9 +543,12 @@ void loop()
       break;
     case button:
     {
+      Serial.printf("quzas click click \n");
+
       if (planedButtonCoolDown < UsableTime)
       {
-        Serial.printf("click \n");
+        Serial.printf("click  \n");
+
         interaction();
         ToggleOnOff();
       }
@@ -538,6 +594,7 @@ void loop()
     // app managing and ploting
     if (!drawn)
     {
+      ttgo->bl->adjust(permanent.brightness);
       ttgo->tft->fillScreen(0);
     }
 
@@ -573,7 +630,12 @@ void loop()
 
         // brigness
 
-        ttgo->tft->drawLine(10, 70, w - 10, 70, 0xFFFFFF);
+        ttgo->tft->drawLine(brightnessBarMargin, 70, w - brightnessBarMargin, 70, 0xFFFFFF);
+
+        double normalizedBrightness = (double(permanent.brightness - MinBrightness) / double(MaxBrightness - MinBrightness));
+        //Serial.println(normalizedBrightness);
+        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, 70, 10, 0xFFFFFF);
+        ttgo->bl->adjust(permanent.brightness);
       }
 
       break;
@@ -601,13 +663,13 @@ void loop()
       if (!drawn)
       {
         int separation = 40;
-        int totalSize = (appCount - 2) * separation;
+        int totalSize = (appCount - 1) * separation;
         int overflow = maximum(totalSize - h, 0);
-        int offset = maximum(0, overflow / (appCount - 2) * selected);
+        int offset = maximum(0, overflow / (appCount - 1) * selected);
 
-        for (int i = 2; i < appCount; i++)
+        for (int i = 1; i < appCount; i++)
         {
-          drawText(AppToString[i], 0, (i - 2) * separation - offset, 2, 2, selected + 2 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
+          drawText(AppToString[i], 0, (i - 2) * separation - offset, 2, 2, selected + 1 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
         }
       }
 
@@ -633,7 +695,7 @@ void loop()
       // draw corona
       if (!drawn)
       {
-        // Serial.println("[START] drawing corona");
+        //Serial.println("[START] drawing corona");
         int ringMmid = (ringMend + ringMstart) / 2 * h / 2;
 
         ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(50, 50, 50));
@@ -643,7 +705,7 @@ void loop()
         {
           double angle = 2 * 3.1415926535897932384626433832795 / 60 * i;
           ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 2, 0x000000);
-          // Serial.println(double(h) * sin(angle));
+          //Serial.println(double(h) * sin(angle));
         }
 
         for (int i = 0; i < 12; i++)
@@ -654,10 +716,10 @@ void loop()
           else
             ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(150, 150, 150));
 
-          // Serial.println(double(h) * sin(angle));
+          //Serial.println(double(h) * sin(angle));
         }
 
-        // Serial.println("[DONE] drawing corona");
+        //Serial.println("[DONE] drawing corona");
       }
 
       double secondAngle = double(seconds) / 60. * 2. * 3.1415926535897932384626433832795;
