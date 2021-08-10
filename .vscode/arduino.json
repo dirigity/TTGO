@@ -2,6 +2,6 @@
     "port": "COM3",
     "configuration": "Revision=TWATCH_BASE,PSRAM=enabled,PartitionScheme=default,UploadSpeed=2000000,DebugLevel=none",
     "board": "esp32:esp32:twatch",
-    "sketch": "lvglTest\\lvglTest.ino",
+    "sketch": "basicWatch\\basicWatch.ino",
     "output": "./build"
 }

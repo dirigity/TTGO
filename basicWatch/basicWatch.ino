@@ -7,7 +7,6 @@
 #define LILYGO_WATCH_LVGL
 
 #include <LilyGoWatch.h>
-#include "RickAstley.c"
 
 #define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
 
@@ -52,6 +51,15 @@ int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
 int w, h;
+
+const int MaxBrigtness = 255;
+struct tPermanent
+{
+  int brigtness = 255;
+  bool carillon = true;
+};
+
+RTC_DATA_ATTR tPermanent permanent;
 
 typedef enum
 {
@@ -110,21 +118,34 @@ bool operator>(RTC_Date a, RTC_Date b)
 
 typedef enum
 {
-  laucher,
-  flashLight,
+  launcher,
   watch,
+
+  flashLight,
   calculator,
   countdown,
   timer,
   teamScores,
-  paint,
   controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-  unitConversor, 
+  unitConversor,
   desmos,
-  textNotes, // lista de puntos en rtc_mem
 
 } tApp;
 tApp app = watch;
+
+int const appCount = 10;
+
+const String AppToString[appCount] = {"launcher",
+                                      "watch",
+
+                                      "flashLight",
+                                      "calculator",
+                                      "countdown",
+                                      "timer",
+                                      "teamScores",
+                                      "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
+                                      "unitConversor",
+                                      "desmos"};
 
 int createRGB(int r, int g, int b)
 {
@@ -144,7 +165,7 @@ void setup()
   ttgo = TTGOClass::getWatch();
   ttgo->begin();
   ttgo->motor_begin();
-  ttgo->lvgl_begin();
+  // ttgo->lvgl_begin();
   ttgo->openBL();
 
   //ttgo->bma->enableAccel();
@@ -258,11 +279,10 @@ void ToggleOnOff()
     {
       setCpuFrequencyMhz(240);
       planedButtonCoolDown = getUsableTime() + 5;
-
     }
     else
     {
-      setCpuFrequencyMhz(24);
+      setCpuFrequencyMhz(80);
     }
   }
   else
@@ -274,6 +294,8 @@ void ToggleOnOff()
 
 void carillon(int h)
 {
+  ttgo->motor->onec(300);
+  delay(1000);
   while (h > 0)
   {
     //Serial.println(h);
@@ -348,9 +370,17 @@ double CapRoundness(double in, double midRad, double Thickness)
   }
 }
 
-double max(double a, double b)
+template <class T>
+T maximum(T a, T b)
 {
   return a > b ? a : b;
+}
+
+template <class T>
+
+T minimum(T a, T b)
+{
+  return a < b ? a : b;
 }
 
 void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
@@ -377,6 +407,8 @@ int startClickY = -1;
 int lastTouchX = -1;
 int lastTouchY = -1;
 
+int selected = -1;
+
 bool fingerDown = false;
 
 void onfingerDown(int x, int y)
@@ -386,16 +418,62 @@ void onfingerDown(int x, int y)
   startClickY = y;
 }
 
+void onfingerDrag(int x, int y)
+{
+  if (app == launcher)
+  {
+    int borderTouchMargin = 20;
+    double touchY = double(y) * double(h + borderTouchMargin * 2) / h - borderTouchMargin;
+
+    touchY = minimum(maximum(0., touchY), double(h - 1));
+    //Serial.println(touchY);
+    int newSelected = int(touchY / double(h) * (appCount - 2));
+    if (selected != newSelected)
+    {
+      selected = newSelected;
+      drawn = false;
+      Serial.printf("current selection is %d \n", selected);
+    }
+  }
+}
+
 void onfingerUp(int x, int y)
 {
 
-  //Serial.printf("finger up x: %d y:%d \n", x, y);
+  Serial.printf("finger up x: %d y:%d \n", x, y);
   //Serial.printf("vertical distance entre touches: %d \n ", y-startClickY);
-  if (y-startClickY > 80)
+  if (app == watch)
   {
-    app = laucher;
-    //Serial.println("ahora estamos en el laucher");
+    if (y - startClickY > 80)
+    {
+      enterDeepSleep();
+    }
+  }
+  if (app != launcher)
+  {
+    if (y - startClickY < -80)
+    {
+      app = launcher;
+      Serial.println("ahora estamos en el launcher");
+      drawn = false;
+      selected = -1;
+      return;
+    }
+  }
+  if (app == flashLight)
+  {
+    app = launcher;
     drawn = false;
+    selected = -1;
+    ttgo->bl->adjust(permanent.brigtness);
+    return;
+  }
+  if (app == launcher && selected >= 0)
+  {
+    app = tApp(selected + 2);
+    Serial.printf("Cambiando a app: %s \n", AppToString[app].c_str());
+    drawn = false;
+    return;
   }
 }
 
@@ -410,6 +488,7 @@ void loop()
     case none:
       break;
     case button:
+    {
       if (planedButtonCoolDown < UsableTime)
       {
         Serial.printf("click \n");
@@ -419,61 +498,132 @@ void loop()
 
       break;
     }
+    }
 
     ttgo->power->clearIRQ();
     interrupt = none;
   }
-  // touch manager
-  {
-    int16_t touchX, touchY;
-    bool touching = ttgo->getTouch(touchX, touchY);
-    if (touching)
-    {
-      lastTouchX = touchX;
-      lastTouchY = touchY;
-
-      interaction();
-      //Serial.printf("x: %u, y: %u \n", touchX, touchY);
-
-      if (!fingerDown)
-      {
-        onfingerDown(touchX, touchY);
-        fingerDown = true;
-      }
-    }
-    else
-    {
-      if (fingerDown)
-      {
-        fingerDown = false;
-        onfingerUp(lastTouchX, lastTouchY);
-      }
-    }
-  }
-
-  // app managing and ploting
   if (ttgo->bl->isOn())
   {
+    // touch manager
+    {
+      int16_t touchX, touchY;
+      bool touching = ttgo->getTouch(touchX, touchY);
+      if (touching)
+      {
+        lastTouchX = touchX;
+        lastTouchY = touchY;
 
-    if(!drawn){
+        interaction();
+        //Serial.printf("x: %u, y: %u \n", touchX, touchY);
+
+        if (!fingerDown)
+        {
+          onfingerDown(touchX, touchY);
+          fingerDown = true;
+        }
+
+        onfingerDrag(touchX, touchY);
+      }
+      else
+      {
+        if (fingerDown)
+        {
+          fingerDown = false;
+          onfingerUp(lastTouchX, lastTouchY);
+        }
+      }
+    }
+    // app managing and ploting
+    if (!drawn)
+    {
       ttgo->tft->fillScreen(0);
     }
 
     switch (app)
     {
-    case laucher:
 
-     
+    case calculator:
+    {
       break;
+    }
+    case countdown:
+    {
+      break;
+    }
+    case timer:
+    {
+      break;
+    }
+    case teamScores:
+    {
+      break;
+    }
+    case controlPannel:
+    {
+      if (!drawn)
+      {
+        // carrillon
+        if (permanent.carillon)
+          drawText("[activado]", 0, 0, 2, 2, createRGB(30, 255, 30));
+        else
+          drawText("[apagado ]", 0, 0, 2, 2, createRGB(255, 30, 30));
+        drawText("Carillon", 130, 0, 2, 2, 0xFFFFFF);
 
+        // brigness
+
+        int margin = 10;
+
+        ttgo->tft->drawLine(margin, 70, w - margin, 70, 0xFFFFFF);
+        ttgo->tft->drawCircle( margin + w-(margin*2) * , 70)
+      }
+
+      break;
+    }
+    case unitConversor:
+    {
+      break;
+    }
+    case desmos:
+    {
+      break;
+    }
+    case flashLight:
+    {
+
+      if (!drawn)
+      {
+        ttgo->bl->adjust(255);
+        ttgo->tft->fillScreen(0xFFFFFF);
+      }
+      break;
+    }
+    case launcher:
+    {
+      if (!drawn)
+      {
+        int separation = 40;
+        int totalSize = (appCount - 2) * separation;
+        int overflow = maximum(totalSize - h, 0);
+        int offset = maximum(0, overflow / (appCount - 2) * selected);
+
+        for (int i = 2; i < appCount; i++)
+        {
+          drawText(AppToString[i], 0, (i - 2) * separation - offset, 2, 2, selected + 2 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
+        }
+      }
+
+      break;
+    }
     case watch:
+    {
 
       // sleep after some time without activity;
       {
         if (planedScreenSleepTime < UsableTime)
         {
           ttgo->bl->off();
-          setCpuFrequencyMhz(2);
+          setCpuFrequencyMhz(80);
         }
 
         if (planedDeepSleepTime < UsableTime)
@@ -558,31 +708,32 @@ void loop()
         }
       }
 
-      drawn = true;
-
       break;
     }
+    }
   }
+  drawn = true;
 
   // carillón
-
-  if (minute == 59)
   {
-    interaction();
-  }
+    if (minute == 59)
+    {
+      interaction();
+    }
 
-  if (seconds == 0 && minute == 0)
-  {
-    int dongs = hour;
-    if (dongs > 13)
+    if (seconds == 0 && minute == 0)
     {
-      dongs -= 12;
+      int dongs = hour;
+      if (dongs > 13)
+      {
+        dongs -= 12;
+      }
+      if (dongs == 0)
+      {
+        dongs = 12;
+      }
+      carillon(dongs);
     }
-    if (dongs == 0)
-    {
-      dongs = 12;
-    }
-    carillon(dongs);
   }
 
   //Serial.printf(ttgo->rtc->formatDateTime(PCF_TIMEFORMAT_HMS));
