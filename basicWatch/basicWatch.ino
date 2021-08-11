@@ -136,7 +136,7 @@ typedef enum
 } tApp;
 tApp app = watch;
 
-int const appCount = 9;
+const int appCount = 9;
 
 const String AppToString[appCount] = {
     "launcher",
@@ -150,7 +150,7 @@ const String AppToString[appCount] = {
     "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
     "unitConversor",
 };
-typedef void(tCallBack)(void *);
+typedef void(tCallBack)();
 
 struct tBox
 {
@@ -168,16 +168,16 @@ struct tButton
   int textColor;
 };
 
-const MAX_ONSCREEN_BUTTONS;
+const int MAX_ONSCREEN_BUTTONS = 5;
 struct tButtonList
 {
   tButton buttons[MAX_ONSCREEN_BUTTONS];
   int counter = 0;
-}
+};
 
 tButtonList buttonList;
 
-void createButton(tBox box, tCallBack function, int color, string text, int textColor)
+void createButton(tBox box, tCallBack function, int color, String text, int textColor)
 {
   tButton wip = {box, function, color, text, textColor};
   buttonList.buttons[buttonList.counter] = wip;
@@ -189,7 +189,7 @@ void clearButtons()
   buttonList.counter = 0;
 }
 
-void insideBox(int x, int y, tBox box)
+bool insideBox(int x, int y, tBox box)
 {
   return x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1;
 }
@@ -335,7 +335,7 @@ void ToggleOnOff()
     }
     else
     {
-      planedDeepSleepTime = getUsableTime() + 15);
+      planedDeepSleepTime = getUsableTime() + 15;
       setCpuFrequencyMhz(80);
     }
   }
@@ -350,8 +350,8 @@ void carillon(int h)
 {
   if (!permanent.carillon)
     return;
-  ttgo->motor->onec(300);
-  delay(1000);
+  ttgo->motor->onec(1000);
+  delay(2000);
   // base 1
   //while (h > 0)
   // {
@@ -367,13 +367,13 @@ void carillon(int h)
   {
     if (h % 2 == 1)
     {
-      ttgo->motor->onec(300);
-      delay(400);
+      ttgo->motor->onec(700);
+      delay(1000);
     }
     else
     {
       ttgo->motor->onec(100);
-      delay(400);
+      delay(1000);
     }
     h /= 2;
   }
@@ -466,6 +466,15 @@ void manageDisc(double clockAngle, double timeAngle, double midsM, double MThick
   drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b)); //, createRGB(Intensity_ * r, Intensity_ * g, Intensity_ * b));
 }
 
+void drawButtons()
+{
+  for (int i = 0; i < buttonList.counter; i++)
+  {
+    const tButton b = buttonList.buttons[i];
+    ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, b.color);
+    drawText(b.text, b.box.x0, b.box.x1, 2, 2, b.textColor);
+  }
+}
 double secondDrawingAngle = 0;
 double minuteDrawingAngle = 0;
 double hourDrawingAngle = 0;
@@ -537,9 +546,10 @@ void onfingerUp(int x, int y)
 
   for (int i = 0; i < buttonList.counter; i++)
   {
-    if (insideBox(x, y, buttonList[i].box))
+    if (insideBox(x, y, buttonList.buttons[i].box))
     {
-      buttonList[i].function(nullptr);
+      buttonList.buttons[i].function();
+      InsideAButton = true;
     }
   }
 
@@ -578,19 +588,6 @@ void onfingerUp(int x, int y)
       selected = -1;
       drawn = false;
       return;
-    }
-    if (app == controlPannel) // sustituir por bottones
-    {
-      if (y < 40)
-      {
-        permanent.carillon = !permanent.carillon;
-        drawn = false;
-      }
-      if (y > 100)
-      {
-        app = launcher;
-        drawn = false;
-      }
     }
   }
 }
@@ -687,19 +684,33 @@ void loop()
       if (!drawn)
       {
         // carrillon
+        tBox box = {10, 10, w - 10, 70};
         if (permanent.carillon)
-          drawText("[activado]", 0, 0, 2, 2, createRGB(30, 255, 30));
+          createButton(
+              box, []
+              {
+                permanent.carillon = false;
+                drawn = false;
+              },
+              createRGB(30, 255, 30), "Apagar Carillon", createRGB(255, 255, 255));
         else
-          drawText("[apagado ]", 0, 0, 2, 2, createRGB(255, 30, 30));
-        drawText("Carillon", 130, 0, 2, 2, 0xFFFFFF);
+          createButton(
+              box, []
+              {
+                permanent.carillon = true;
+                drawn = false;
+              },
+              createRGB(255, 30, 30), "Encender Carillon", createRGB(255, 255, 255));
 
-        // brigness
+        // brigness bar
 
-        ttgo->tft->drawLine(brightnessBarMargin, 70, w - brightnessBarMargin, 70, 0xFFFFFF);
+        const int barHeight = 70;
+
+        ttgo->tft->drawLine(brightnessBarMargin, barHeight, w - brightnessBarMargin, barHeight, 0xFFFFFF);
 
         double normalizedBrightness = (double(permanent.brightness - MinBrightness) / double(MaxBrightness - MinBrightness));
         //Serial.println(normalizedBrightness);
-        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, 70, 10, 0xFFFFFF);
+        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, barHeight, 10, 0xFFFFFF);
         ttgo->bl->adjust(permanent.brightness);
       }
 
@@ -849,14 +860,14 @@ void loop()
     if (seconds == 0 && minute == 0)
     {
       int dongs = hour;
-      if (dongs > 13)
-      {
-        dongs -= 12;
-      }
-      if (dongs == 0)
-      {
-        dongs = 12;
-      }
+      // if (dongs > 13)
+      // {
+      //   dongs -= 12;
+      // }
+      // if (dongs == 0)
+      // {
+      //   dongs = 12;
+      // }
       carillon(dongs);
     }
   }
@@ -864,12 +875,7 @@ void loop()
   // pintarBottones
   if (!drawn)
   {
-    for (int i = 0; i < buttonList.counter; i++)
-    {
-      const b = buttonList[i];
-      ttgo->tft->fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0, b.color);
-      drawText(b.text, b.x0, b.x1, 2,2, b.textColor);
-    }
+    drawButtons();
   }
 
   drawn = true;
