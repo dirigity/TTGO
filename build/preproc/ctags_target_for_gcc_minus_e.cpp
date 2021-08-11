@@ -286,6 +286,7 @@ void ToggleOnOff()
     }
     else
     {
+      planedDeepSleepTime = getUsableTime() + 15);
       setCpuFrequencyMhz(80);
     }
   }
@@ -543,7 +544,7 @@ void loop()
       break;
     case button:
     {
-      Serial.printf("quzas click click \n");
+      Serial.printf("quzas click \n");
 
       if (planedButtonCoolDown < UsableTime)
       {
@@ -663,13 +664,13 @@ void loop()
       if (!drawn)
       {
         int separation = 40;
-        int totalSize = (appCount - 1) * separation;
+        int totalSize = (appCount) * separation;
         int overflow = maximum(totalSize - h, 0);
         int offset = maximum(0, overflow / (appCount - 1) * selected);
 
         for (int i = 1; i < appCount; i++)
         {
-          drawText(AppToString[i], 0, (i - 2) * separation - offset, 2, 2, selected + 1 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
+          drawText(AppToString[i], 0, (i - 1) * separation - offset, 2, 2, selected + 1 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
         }
       }
 

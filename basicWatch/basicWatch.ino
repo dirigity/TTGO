@@ -136,19 +136,63 @@ typedef enum
 } tApp;
 tApp app = watch;
 
-int const appCount = 10;
+int const appCount = 9;
 
-const String AppToString[appCount] = {"launcher",
+const String AppToString[appCount] = {
+    "launcher",
 
-                                      "watch",
-                                      "flashLight",
-                                      "calculator",
-                                      "countdown",
-                                      "timer",
-                                      "teamScores",
-                                      "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-                                      "unitConversor",
-                                      "desmos"};
+    "watch",
+    "flashLight",
+    "calculator", // demos and scientific
+    "countdown",
+    "timer",
+    "teamScores",
+    "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
+    "unitConversor",
+};
+typedef void(tCallBack)(void *);
+
+struct tBox
+{
+  int x0;
+  int y0;
+  int x1;
+  int y1;
+};
+struct tButton
+{
+  tBox box;
+  tCallBack function;
+  int color;
+  String text;
+  int textColor;
+};
+
+const MAX_ONSCREEN_BUTTONS;
+struct tButtonList
+{
+  tButton buttons[MAX_ONSCREEN_BUTTONS];
+  int counter = 0;
+}
+
+tButtonList buttonList;
+
+void createButton(tBox box, tCallBack function, int color, string text, int textColor)
+{
+  tButton wip = {box, function, color, text, textColor};
+  buttonList.buttons[buttonList.counter] = wip;
+  buttonList.counter++;
+}
+
+void clearButtons()
+{
+  buttonList.counter = 0;
+}
+
+void insideBox(int x, int y, tBox box)
+{
+  return x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1;
+}
 
 int createRGB(int r, int g, int b)
 {
@@ -224,21 +268,27 @@ void enterDeepSleep()
 
   int year, month, day, hour, minute, seconds;
   getTime(year, month, day, hour, minute, seconds);
+  if (permanent.carillon)
+  {
+    int waitTime = 0;
 
-  int waitTime = 0;
+    if (!asleep(hour + 1))
+    { // wake up next hour o'Clock
+      waitTime = ((60 - minute) * 60 - 60);
+    }
+    else
+    { // wake up tomorrow
+      waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
+    }
 
-  if (!asleep(hour + 1))
-  { // wake up next hour o'Clock
-    waitTime = ((60 - minute) * 60 - 60);
+    Serial.printf("Saldre del deep sleep %u \n", waitTime);
+
+    esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * waitTime);
   }
   else
-  { // wake up tomorrow
-    waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
+  {
+    Serial.printf("no saldre del deep sleep automaticamente porque el carillon esta desactivado \n");
   }
-
-  Serial.printf("Saldre del deep sleep %u \n", waitTime);
-
-  esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * waitTime);
 
   esp_deep_sleep_start();
 }
@@ -285,6 +335,7 @@ void ToggleOnOff()
     }
     else
     {
+      planedDeepSleepTime = getUsableTime() + 15);
       setCpuFrequencyMhz(80);
     }
   }
@@ -399,7 +450,6 @@ T maximum(T a, T b)
 }
 
 template <class T>
-
 T minimum(T a, T b)
 {
   return a < b ? a : b;
@@ -482,50 +532,65 @@ void onfingerUp(int x, int y)
 
   Serial.printf("finger up x: %d y:%d \n", x, y);
   //Serial.printf("vertical distance entre touches: %d \n ", y-startClickY);
-  if (app == watch)
+
+  bool InsideAButton = false;
+
+  for (int i = 0; i < buttonList.counter; i++)
   {
-    if (y - startClickY > 80)
+    if (insideBox(x, y, buttonList[i].box))
     {
-      enterDeepSleep();
+      buttonList[i].function(nullptr);
     }
   }
-  if (app != launcher)
+
+  if (!InsideAButton)
   {
-    if (y - startClickY < -80)
+    if (app == watch)
+    {
+      if (y - startClickY > 80)
+      {
+        enterDeepSleep();
+      }
+    }
+    if (app != launcher)
+    {
+      if (y - startClickY < -80)
+      {
+        app = launcher;
+        Serial.println("ahora estamos en el launcher");
+        drawn = false;
+        selected = -1;
+        return;
+      }
+    }
+    if (app == flashLight)
     {
       app = launcher;
-      Serial.println("ahora estamos en el launcher");
       drawn = false;
       selected = -1;
+      ttgo->bl->adjust(permanent.brightness);
       return;
     }
-  }
-  if (app == flashLight)
-  {
-    app = launcher;
-    drawn = false;
-    selected = -1;
-    ttgo->bl->adjust(permanent.brightness);
-    return;
-  }
-  if (app == launcher && selected >= 0)
-  {
-    app = tApp(selected + 1);
-    Serial.printf("Cambiando a app: %s \n", AppToString[app].c_str());
-    selected = -1;
-    drawn = false;
-    return;
-  }
-  if (app == controlPannel)
-  {
-    if (y < 40)
+    if (app == launcher && selected >= 0)
     {
-      permanent.carillon = !permanent.carillon;
+      app = tApp(selected + 1);
+      Serial.printf("Cambiando a app: %s \n", AppToString[app].c_str());
+      selected = -1;
       drawn = false;
+      return;
     }
-    if( y > 100){
-      app = launcher;
-      drawn = false;
+    if (app == controlPannel) // sustituir por bottones
+    {
+      if (y < 40)
+      {
+        permanent.carillon = !permanent.carillon;
+        drawn = false;
+      }
+      if (y > 100)
+      {
+        app = launcher;
+        drawn = false;
+      }
     }
   }
 }
@@ -542,7 +607,7 @@ void loop()
       break;
     case button:
     {
-      Serial.printf("quzas click click \n");
+      Serial.printf("quzas click \n");
 
       if (planedButtonCoolDown < UsableTime)
       {
@@ -595,6 +660,7 @@ void loop()
     {
       ttgo->bl->adjust(permanent.brightness);
       ttgo->tft->fillScreen(0);
+      clearButtons();
     }
 
     switch (app)
@@ -662,13 +728,13 @@ void loop()
       if (!drawn)
       {
         int separation = 40;
-        int totalSize = (appCount - 1) * separation;
+        int totalSize = (appCount)*separation;
         int overflow = maximum(totalSize - h, 0);
         int offset = maximum(0, overflow / (appCount - 1) * selected);
 
         for (int i = 1; i < appCount; i++)
         {
-          drawText(AppToString[i], 0, (i - 2) * separation - offset, 2, 2, selected + 1 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
+          drawText(AppToString[i], 0, (i - 1) * separation - offset, 2, 2, selected + 1 == i ? createRGB(255, 255, 255) : createRGB(100, 100, 100));
         }
       }
 
@@ -771,9 +837,9 @@ void loop()
     }
     }
   }
-  drawn = true;
 
   // carillón
+  if (permanent.carillon)
   {
     if (minute == 59)
     {
@@ -795,7 +861,18 @@ void loop()
     }
   }
 
-  //Serial.printf(ttgo->rtc->formatDateTime(PCF_TIMEFORMAT_HMS));
+  // pintarBottones
+  if (!drawn)
+  {
+    for (int i = 0; i < buttonList.counter; i++)
+    {
+      const b = buttonList[i];
+      ttgo->tft->fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0, b.color);
+      drawText(b.text, b.x0, b.x1, 2,2, b.textColor);
+    }
+  }
+
+  drawn = true;
 }
 
 //TFT_BLACK(#000000)
