@@ -122,8 +122,8 @@ bool operator>(RTC_Date a, RTC_Date b)
 typedef enum
 {
   launcher,
-  watch,
 
+  watch,
   flashLight,
   calculator,
   countdown,
@@ -131,7 +131,6 @@ typedef enum
   teamScores,
   controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
   unitConversor,
-  desmos,
 
 } tApp;
 tApp app = watch;
@@ -150,7 +149,6 @@ const String AppToString[appCount] = {
     "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
     "unitConversor",
 };
-typedef void(tCallBack)();
 
 struct tBox
 {
@@ -159,13 +157,15 @@ struct tBox
   int x1;
   int y1;
 };
+
 struct tButton
 {
   tBox box;
-  tCallBack function;
+  void (*function)();
   int color;
   String text;
   int textColor;
+  bool pressed;
 };
 
 const int MAX_ONSCREEN_BUTTONS = 5;
@@ -177,9 +177,9 @@ struct tButtonList
 
 tButtonList buttonList;
 
-void createButton(tBox box, tCallBack function, int color, String text, int textColor)
+void createButton(struct tBox box, void (*function)(), int color, String text, int textColor)
 {
-  tButton wip = {box, function, color, text, textColor};
+  struct tButton wip = {box, function, color, text, textColor, false};
   buttonList.buttons[buttonList.counter] = wip;
   buttonList.counter++;
 }
@@ -196,9 +196,24 @@ bool insideBox(int x, int y, tBox box)
 
 int createRGB(int r, int g, int b)
 {
-
   return ttgo->tft->color565(r, g, b);
   //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
+}
+
+const int RED_CANCEL = createRGB(255, 70, 70);
+const int GREEN_ALLOW = createRGB(70, 255, 70);
+
+void destructurateRGB(int col, int &r, int &g, int &b)
+{
+  b = col & 0x1F;
+  col >> 5;
+  g = col & 0x3F;
+  col >> 6;
+  r = col & 0x1F;
+
+  b = b << 3;
+  g = g << 2;
+  r = r << 3;
 }
 
 bool drawn = false;
@@ -382,6 +397,7 @@ void carillon(int h)
 
 int getUsableTime()
 {
+  return millis() / 1000;
   int year, month, day, hour, minute, seconds;
   getTime(year, month, day, hour, minute, seconds);
   return seconds + 60 * (minute + 60 * (hour + 24 * (day + 30 * (month + 12 * (year - 2020)))));
@@ -470,9 +486,24 @@ void drawButtons()
 {
   for (int i = 0; i < buttonList.counter; i++)
   {
+    const int borderSize = 2;
     const tButton b = buttonList.buttons[i];
-    ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, b.color);
-    drawText(b.text, b.box.x0, b.box.x1, 2, 2, b.textColor);
+    int r, g, blue;
+    destructurateRGB(b.color, r, g, blue);
+    int k = 40;
+    int borderCol = createRGB(max(0, r - k), max(0, g - k), max(0, blue - k));
+    int fillCol = b.color;
+
+    if (b.pressed)
+    {
+      int kk = borderCol;
+      borderCol = fillCol;
+      fillCol = kk;
+    }
+
+    ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, borderCol);
+    ttgo->tft->fillRect(b.box.x0 + borderSize, b.box.y0 + borderSize, b.box.x1 - b.box.x0 - borderSize * 2, b.box.y1 - b.box.y0 - borderSize * 2, fillCol);
+    drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, 2, 2, b.textColor);
   }
 }
 double secondDrawingAngle = 0;
@@ -501,36 +532,67 @@ void onfingerDown(int x, int y)
 
 void onfingerDrag(int x, int y)
 {
-  if (app == launcher)
-  {
-    int borderTouchMargin = 20;
-    double touchY = double(y) * double(h + borderTouchMargin * 2) / h - borderTouchMargin;
 
-    touchY = minimum(maximum(0., touchY), double(h - 1));
-    //Serial.println(touchY);
-    int newSelected = int(touchY / double(h) * (appCount - 1));
-    if (selected != newSelected)
+  bool InsideAButton = false;
+
+  for (int i = 0; i < buttonList.counter; i++)
+  {
+    if (insideBox(x, y, buttonList.buttons[i].box))
     {
-      selected = newSelected;
-      drawn = false;
-      Serial.printf("current selection is %d \n", selected);
+      if (!buttonList.buttons[i].pressed)
+      {
+        InsideAButton = true;
+        buttonList.buttons[i].pressed = true;
+      }
+      //Serial.println("se conoce que estamos pulsando un botton o algo");
+    }
+    else
+    {
+      if (buttonList.buttons[i].pressed)
+      {
+        InsideAButton = true;
+        buttonList.buttons[i].pressed = false;
+      }
     }
   }
-  if (app == controlPannel)
+
+  if (InsideAButton)
   {
-    if (y > 40 && y < 100)
+    drawButtons();
+  }
+  else
+  {
+    if (app == launcher)
     {
-      double normalizedPress = double(x - brightnessBarMargin) / double(w - brightnessBarMargin * 2);
+      int borderTouchMargin = 20;
+      double touchY = double(y) * double(h + borderTouchMargin * 2) / h - borderTouchMargin;
 
-      normalizedPress = minimum(maximum(normalizedPress, 0.), 1.);
-
-      int newValue = MinBrightness + (MaxBrightness - MinBrightness) * normalizedPress;
-      //Serial.println(newValue);
-
-      if (permanent.brightness != newValue)
+      touchY = minimum(maximum(0., touchY), double(h - 1));
+      //Serial.println(touchY);
+      int newSelected = int(touchY / double(h) * (appCount - 1));
+      if (selected != newSelected)
       {
-        permanent.brightness = newValue;
+        selected = newSelected;
         drawn = false;
+        Serial.printf("current selection is %d \n", selected);
+      }
+    }
+    if (app == controlPannel) // brightness scrool
+    {
+      if (y > 40 && y < 100)
+      {
+        double normalizedPress = double(x - brightnessBarMargin) / double(w - brightnessBarMargin * 2);
+
+        normalizedPress = minimum(maximum(normalizedPress, 0.), 1.);
+
+        int newValue = MinBrightness + (MaxBrightness - MinBrightness) * normalizedPress;
+        //Serial.println(newValue);
+
+        if (permanent.brightness != newValue)
+        {
+          permanent.brightness = newValue;
+          drawn = false;
+        }
       }
     }
   }
@@ -579,6 +641,7 @@ void onfingerUp(int x, int y)
       drawn = false;
       selected = -1;
       ttgo->bl->adjust(permanent.brightness);
+
       return;
     }
     if (app == launcher && selected >= 0)
@@ -591,6 +654,22 @@ void onfingerUp(int x, int y)
     }
   }
 }
+
+int startTimerTime = 0;
+int stopedTimerTime = 0;
+int currentlyDrawnSecondsSinceStart = 0;
+int TimerRuning = false;
+int LapTimes[5] = {0};
+int lastLapTime = -1;
+
+const int MaxStoredLaps = 5;
+struct tLapList
+{
+  char laps[MaxStoredLaps][25];
+  int counter = 0;
+};
+
+tLapList lapList;
 
 void loop()
 {
@@ -673,6 +752,147 @@ void loop()
     }
     case timer:
     {
+      const int posX = 20;
+      const int posY = 20;
+      //Serial.println("timer loop");
+      if (!drawn)
+      {
+        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
+        for (int i = 0; i < lapList.counter; i++)
+        {
+          drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+        }
+
+        tBox boxStartAndStop = {20, 190, w / 2 - 20, 225};
+        tBox boxLapAndReset = {w / 2 + 20, 190, w - 20, 225};
+        if (!TimerRuning)
+        {
+          createButton(
+              boxStartAndStop, []
+              {
+                if (startTimerTime == 0)
+                {
+                  startTimerTime = getUsableTime();
+                }
+                else
+                {
+                  startTimerTime = getUsableTime() - (stopedTimerTime - startTimerTime);
+                }
+                TimerRuning = true;
+                drawn = false;
+                currentlyDrawnSecondsSinceStart = -1;
+              },
+              GREEN_ALLOW, "Start", 0x0000);
+          createButton(
+              boxLapAndReset, []
+              {
+                startTimerTime = 0;
+                stopedTimerTime = 0;
+                TimerRuning = false;
+                drawn = false;
+                ttgo->tft->fillRect(0, 0, w, h / 4, 0);
+                drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
+                currentlyDrawnSecondsSinceStart = -1;
+
+                lastLapTime = -1;
+                lapList.counter = 0;
+                ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
+              },
+              RED_CANCEL, "Reset", 0x0000);
+        }
+        else
+        {
+          createButton(
+              boxStartAndStop, []
+              {
+                stopedTimerTime = getUsableTime();
+                TimerRuning = false;
+                drawn = false;
+                currentlyDrawnSecondsSinceStart = -1;
+              },
+              RED_CANCEL, "Stop", 0x0000);
+          createButton(
+              boxLapAndReset, []
+              {
+                if (lapList.counter == MaxStoredLaps)
+                {
+
+                  for (int i = 1; i < MaxStoredLaps; i++)
+                  {
+                    int dst = i - 1;
+                    int src = i;
+
+                    for (int j = 0; j < 25; j++)
+                    {
+                      lapList.laps[dst][j] = lapList.laps[src][j];
+                    }
+                  }
+
+                  lapList.counter--;
+                }
+                int secondsSinceStart = getUsableTime() - startTimerTime;
+                int hoursSinceStart = secondsSinceStart / 3600;
+                int minutesSinceStart = (secondsSinceStart % 3600) / 60;
+                int seconds = secondsSinceStart % 60;
+
+                int diferenceFromLast = 0;
+                if (lastLapTime != -1)
+                {
+                  diferenceFromLast = getUsableTime() - lastLapTime;
+                  sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d (+%d) ", hoursSinceStart, minutesSinceStart, seconds, diferenceFromLast);
+                }
+                else
+                {
+                  sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d ", hoursSinceStart, minutesSinceStart, seconds);
+                }
+
+                lastLapTime = getUsableTime();
+
+                lapList.counter++;
+
+                ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
+
+                for (int i = 0; i < lapList.counter; i++)
+                {
+                  drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+                }
+              },
+              createRGB(255, 255, 30), "Lap", 0x0000);
+        }
+        if (startTimerTime == 0)
+        {
+          ttgo->tft->fillRect(0, 0, w, h / 4, 0);
+          drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
+        }
+      }
+      int secondsSinceStart;
+      if (TimerRuning)
+        secondsSinceStart = UsableTime - startTimerTime;
+      else
+        secondsSinceStart = stopedTimerTime - startTimerTime;
+
+      // Serial.println("secondsSinceStart");
+      // Serial.println(secondsSinceStart);
+      // Serial.println("TimerRuning");
+      // Serial.println(TimerRuning);
+      // Serial.println("currentlyDrawnSecondsSinceStart");
+      // Serial.println(currentlyDrawnSecondsSinceStart);
+
+      if (secondsSinceStart != currentlyDrawnSecondsSinceStart)
+      {
+        currentlyDrawnSecondsSinceStart = secondsSinceStart;
+        int hoursSinceStart = secondsSinceStart / 3600;
+        int minutesSinceStart = (secondsSinceStart % 3600) / 60;
+        int seconds = secondsSinceStart % 60;
+
+        char buff[10];
+        sprintf(buff, "%02d:%02d:%02d", hoursSinceStart, minutesSinceStart, seconds);
+        //printf("[%d] %d:%d:%d \n", secondsSinceStart, hoursSinceStart, minutesSinceStart, seconds);
+        //Serial.printf("%s la hora /n",buff)
+        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
+        drawText(String(buff), posX, posY, 4, 2, 0xFFFF);
+      }
+
       break;
     }
     case teamScores:
@@ -684,7 +904,7 @@ void loop()
       if (!drawn)
       {
         // carrillon
-        tBox box = {10, 10, w - 10, 70};
+        tBox box = {10, 10, w - 10, 45};
         if (permanent.carillon)
           createButton(
               box, []
@@ -692,7 +912,7 @@ void loop()
                 permanent.carillon = false;
                 drawn = false;
               },
-              createRGB(30, 255, 30), "Apagar Carillon", createRGB(255, 255, 255));
+              GREEN_ALLOW, "Apagar Carillon", createRGB(0, 0, 0));
         else
           createButton(
               box, []
@@ -700,18 +920,28 @@ void loop()
                 permanent.carillon = true;
                 drawn = false;
               },
-              createRGB(255, 30, 30), "Encender Carillon", createRGB(255, 255, 255));
+              RED_CANCEL, "Activar Carillon", createRGB(255, 255, 255));
 
         // brigness bar
 
         const int barHeight = 70;
 
-        ttgo->tft->drawLine(brightnessBarMargin, barHeight, w - brightnessBarMargin, barHeight, 0xFFFFFF);
+        ttgo->tft->drawLine(brightnessBarMargin, barHeight, w - brightnessBarMargin, barHeight, 0xFFFF);
 
         double normalizedBrightness = (double(permanent.brightness - MinBrightness) / double(MaxBrightness - MinBrightness));
         //Serial.println(normalizedBrightness);
-        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, barHeight, 10, 0xFFFFFF);
+        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, barHeight, 10, 0xFFFF);
         ttgo->bl->adjust(permanent.brightness);
+
+        // exit button
+        tBox boxExit = {10, 100, w - 10, 135};
+        createButton(
+            boxExit, []
+            {
+              app = launcher;
+              drawn = false;
+            },
+            createRGB(255, 255, 255), "Back", 0x0000);
       }
 
       break;
@@ -720,17 +950,12 @@ void loop()
     {
       break;
     }
-    case desmos:
-    {
-      break;
-    }
     case flashLight:
     {
-
       if (!drawn)
       {
         ttgo->bl->adjust(255);
-        ttgo->tft->fillScreen(0xFFFFFF);
+        ttgo->tft->fillScreen(0xFFFF);
       }
       break;
     }
@@ -775,12 +1000,12 @@ void loop()
         int ringMmid = (ringMend + ringMstart) / 2 * h / 2;
 
         ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(50, 50, 50));
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x000000);
+        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x0000);
 
         for (int i = 0; i < 60; i++)
         {
           double angle = 2 * PI / 60 * i;
-          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 2, 0x000000);
+          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 2, 0x0000);
           //Serial.println(double(h) * sin(angle));
         }
 
