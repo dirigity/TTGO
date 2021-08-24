@@ -1,24 +1,9 @@
 #include <Arduino.h>
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-// Must be defined before include LilyGoWatch librarie
-// Uncomment the line corresponding your T-Watch
-// #define LILYGO_WATCH_2019_WITH_TOUCH     // To use T-Watch2019 with touchscreen, please uncomment this line
-// #define LILYGO_WATCH_2019_NO_TOUCH    // To use T-Watch2019 Not touchscreen , please uncomment this line
-#define LILYGO_WATCH_2020_V1 //To use T-Watch2020, please uncomment this line
-#define LILYGO_WATCH_HAS_MOTOR
-#define LILYGO_WATCH_LVGL
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\ttgoGlovalDeclarations.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\buttonSistem.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\utils.ino"
 
-#include <LilyGoWatch.h>
-
-#define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
-
-TTGOClass *ttgo;
-
-LV_IMG_DECLARE(RickAstley);
-
-const int SleepingHours = 10;
-const int timeToSleep = 23;
-const int timeToWakeUp = 9;
 
 const double secondsMstart = .15;
 const double secondsMend = .3;
@@ -49,235 +34,29 @@ const double hourMThickness = hourMend - hourMstart;
 const double midBattM = (battMstart + battMend) / 2;
 const double battMThickness = battMend - battMstart;
 
-int planedDeepSleepTime = 0;
-int planedScreenSleepTime = 0;
-int planedButtonCoolDown = 0;
-int w, h;
-
-const int MaxBrightness = 255;
-const int MinBrightness = 10;
-const int brightnessBarMargin = 10;
-
-struct tPermanent
-{
-  int brightness = 255;
-  bool carillon = true;
-};
-
-RTC_DATA_ATTR tPermanent permanent;
-
-typedef enum
-{
-  none,
-  button
-} tInterrupt;
-tInterrupt interrupt = none;
-
-#line 74 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-bool operator >(RTC_Date a, RTC_Date b);
-#line 180 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void createButton(struct tBox box, void (*function)(), int color, String text, int textColor);
-#line 187 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void clearButtons();
-#line 192 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-bool insideBox(int x, int y, tBox box);
-#line 197 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-int createRGB(int r, int g, int b);
-#line 206 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void destructurateRGB(int col, int &r, int &g, int &b);
-#line 221 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 35 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void setup();
-#line 274 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-bool asleep(int h);
-#line 279 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void enterDeepSleep();
-#line 311 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void drawText(String t, int x, int y, int size, int font, int col);
-#line 322 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void getTime(int &year, int &month, int &day, int &h, int &m, int &s);
-#line 334 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void ToggleOnOff();
-#line 364 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void carillon(int h);
-#line 398 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-int getUsableTime();
-#line 406 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-void interaction();
-#line 413 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 90 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void drawPolarSegment(double angle, double startM, double endM, int col);
-#line 425 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-double angle(double a);
-#line 438 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 102 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 double capRoundFunctionCeroToOne(double i);
-#line 443 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 107 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 double CapRoundness(double in, double midRad, double Thickness);
-#line 461 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-template <class T>T maximum(T a, T b);
-#line 467 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-template <class T>T minimum(T a, T b);
-#line 474 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 126 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b);
-#line 485 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 142 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void drawButtons();
-#line 526 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 183 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void onfingerDown(int x, int y);
-#line 533 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 190 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void onfingerDrag(int x, int y);
-#line 601 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 258 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void onfingerUp(int x, int y);
-#line 674 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
+#line 331 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void loop();
-#line 74 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
-bool operator>(RTC_Date a, RTC_Date b)
-{
-  if (a.year > b.year)
-  {
-    return true;
-  }
-  else if (a.year == b.year)
-  {
-    if (a.month > b.month)
-    {
-      return true;
-    }
-    else if (a.month == b.month)
-    {
-      if (a.day > b.day)
-      {
-        return true;
-      }
-      else if (a.day == b.day)
-      {
-        if (a.hour > b.hour)
-        {
-          return true;
-        }
-        else if (a.hour == b.hour)
-        {
-          if (a.minute > b.minute)
-          {
-            return true;
-          }
-          else
-          {
-            if (a.minute == b.minute)
-            {
-              if (a.second > b.second)
-              {
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return false;
-}
-
-typedef enum
-{
-  launcher,
-
-  watch,
-  flashLight,
-  calculator,
-  countdown,
-  timer,
-  teamScores,
-  controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-  unitConversor,
-
-} tApp;
-tApp app = watch;
-
-const int appCount = 9;
-
-const String AppToString[appCount] = {
-    "launcher",
-
-    "watch",
-    "flashLight",
-    "calculator", // demos and scientific
-    "countdown",
-    "timer",
-    "teamScores",
-    "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-    "unitConversor",
-};
-
-struct tBox
-{
-  int x0;
-  int y0;
-  int x1;
-  int y1;
-};
-
-struct tButton
-{
-  tBox box;
-  void (*function)();
-  int color;
-  String text;
-  int textColor;
-  bool pressed;
-};
-
-const int MAX_ONSCREEN_BUTTONS = 5;
-struct tButtonList
-{
-  tButton buttons[MAX_ONSCREEN_BUTTONS];
-  int counter = 0;
-};
-
-tButtonList buttonList;
-
-void createButton(struct tBox box, void (*function)(), int color, String text, int textColor)
-{
-  struct tButton wip = {box, function, color, text, textColor, false};
-  buttonList.buttons[buttonList.counter] = wip;
-  buttonList.counter++;
-}
-
-void clearButtons()
-{
-  buttonList.counter = 0;
-}
-
-bool insideBox(int x, int y, tBox box)
-{
-  return x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1;
-}
-
-int createRGB(int r, int g, int b)
-{
-  return ttgo->tft->color565(r, g, b);
-  //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
-}
-
-const int RED_CANCEL = createRGB(255, 70, 70);
-const int GREEN_ALLOW = createRGB(70, 255, 70);
-
-void destructurateRGB(int col, int &r, int &g, int &b)
-{
-  b = col & 0x1F;
-  col >> 5;
-  g = col & 0x3F;
-  col >> 6;
-  r = col & 0x1F;
-
-  b = b << 3;
-  g = g << 2;
-  r = r << 3;
-}
-
-bool drawn = false;
-
+#line 35 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\basicWatch.ino"
 void setup()
 {
-
   Serial.begin(115200);
 
   // Get Watch object and set up the display
@@ -294,6 +73,9 @@ void setup()
 
   w = ttgo->tft->width();
   h = ttgo->tft->height();
+
+  RED_CANCEL = createRGB(255, 70, 70);
+  GREEN_ALLOW = createRGB(70, 255, 70);
 
   // turn on/off
 
@@ -328,145 +110,6 @@ void setup()
   Serial.printf("Setup done!! \n");
 }
 
-bool asleep(int h)
-{
-  return !(h > timeToWakeUp && h < timeToSleep);
-}
-
-void enterDeepSleep()
-{ // manage next automatic wakeup
-
-  Serial.println("starting deep sleep");
-
-  int year, month, day, hour, minute, seconds;
-  getTime(year, month, day, hour, minute, seconds);
-  if (permanent.carillon)
-  {
-    int waitTime = 0;
-
-    if (!asleep(hour + 1))
-    { // wake up next hour o'Clock
-      waitTime = ((60 - minute) * 60 - 60);
-    }
-    else
-    { // wake up tomorrow
-      waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
-    }
-
-    Serial.printf("Saldre del deep sleep %u \n", waitTime);
-
-    esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * waitTime);
-  }
-  else
-  {
-    Serial.printf("no saldre del deep sleep automaticamente porque el carillon esta desactivado \n");
-  }
-
-  esp_deep_sleep_start();
-}
-
-void drawText(String t, int x, int y, int size, int font, int col)
-{
-  ttgo->tft->setTextColor(col);
-
-  ttgo->tft->setTextFont(size);
-  ttgo->tft->setTextSize(font);
-
-  ttgo->tft->setCursor(x, y);
-  ttgo->tft->println(t);
-}
-
-void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
-{
-  RTC_Date ret = ttgo->rtc->getDateTime();
-
-  year = ret.year;
-  month = ret.month;
-  day = ret.day;
-  h = ret.hour;
-  m = ret.minute;
-  s = ret.second;
-}
-
-void ToggleOnOff()
-{
-
-  drawn = false;
-  app = watch;
-
-  ttgo->power->readIRQ();
-  if (ttgo->power->isPEKShortPressIRQ())
-  { // if short click turn off screen
-    ttgo->power->clearIRQ();
-    ttgo->bl->reverse();
-
-    if (ttgo->bl->isOn())
-    {
-      setCpuFrequencyMhz(240);
-      planedButtonCoolDown = getUsableTime() + 5;
-    }
-    else
-    {
-      planedDeepSleepTime = getUsableTime() + 15;
-      setCpuFrequencyMhz(80);
-    }
-  }
-  else
-  { // if long click enter deepSleep
-    ttgo->power->clearIRQ();
-    enterDeepSleep();
-  }
-}
-
-void carillon(int h)
-{
-  if (!permanent.carillon)
-    return;
-  ttgo->motor->onec(1000);
-  delay(2000);
-  // base 1
-  //while (h > 0)
-  // {
-  //   //Serial.println(h);
-
-  //   h--;
-  //   ttgo->motor->onec(100);
-  //   delay(400);
-  // }
-  // base 2
-
-  while (h > 0)
-  {
-    if (h % 2 == 1)
-    {
-      ttgo->motor->onec(700);
-      delay(1000);
-    }
-    else
-    {
-      ttgo->motor->onec(100);
-      delay(1000);
-    }
-    h /= 2;
-  }
-  interaction();
-}
-
-int getUsableTime()
-{
-  return millis() / 1000;
-  int year, month, day, hour, minute, seconds;
-  getTime(year, month, day, hour, minute, seconds);
-  return seconds + 60 * (minute + 60 * (hour + 24 * (day + 30 * (month + 12 * (year - 2020)))));
-}
-
-void interaction()
-{
-  int time = getUsableTime();
-  planedScreenSleepTime = time + 30;
-  planedDeepSleepTime = time + 45;
-}
-
 void drawPolarSegment(double angle, double startM, double endM, int col) //, int darkerCol)
 {
   int x0 = w / 2 + sin(angle) * startM;
@@ -477,19 +120,6 @@ void drawPolarSegment(double angle, double startM, double endM, int col) //, int
   ttgo->tft->drawLine(x0, y0, x1, y1, col);
   ttgo->tft->drawLine(x0 + 1, y0, x1 + 1, y1, col);
   ttgo->tft->drawLine(x0, y0 + 1, x1, y1 + 1, col);
-}
-
-double angle(double a)
-{
-  while (a > 2 * PI)
-  {
-    a -= 2 * PI;
-  }
-  while (a < 0)
-  {
-    a += 2 * PI;
-  }
-  return a;
 }
 
 double capRoundFunctionCeroToOne(double i)
@@ -516,18 +146,6 @@ double CapRoundness(double in, double midRad, double Thickness)
   }
 }
 
-template <class T>
-T maximum(T a, T b)
-{
-  return a > b ? a : b;
-}
-
-template <class T>
-T minimum(T a, T b)
-{
-  return a < b ? a : b;
-}
-
 void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
 {
   double Intensity = angle(clockAngle - timeAngle) / (2 * PI);
@@ -536,7 +154,12 @@ void manageDisc(double clockAngle, double timeAngle, double midsM, double MThick
   double Mstart_ = midsM - MThickness / 2 * CurrentCapRoundness;
   double Mend_ = midsM + MThickness / 2 * CurrentCapRoundness;
 
-  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b)); //, createRGB(Intensity_ * r, Intensity_ * g, Intensity_ * b));
+  if (CurrentCapRoundness != 1)
+  {
+    drawPolarSegment(clockAngle, h / 2 * (midsM - MThickness / 2), h / 2 * midsM + MThickness / 2, TFT_BLACK);
+  }
+
+  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b));
 }
 
 void drawButtons()
@@ -1188,3 +811,379 @@ void loop()
 //TFT_SKYBLUE (#87CEEB)
 //TFT_VIOLET (#B42EE2)
 
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\buttonSistem.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\ttgoGlovalDeclarations.ino"
+
+#ifndef buttonSistem
+#define buttonSistem
+
+struct tBox
+{
+    int x0;
+    int y0;
+    int x1;
+    int y1;
+};
+
+struct tButton
+{
+    tBox box;
+    void (*function)();
+    int color;
+    String text;
+    int textColor;
+    bool pressed;
+};
+
+const int MAX_ONSCREEN_BUTTONS = 5;
+struct tButtonList
+{
+    tButton buttons[MAX_ONSCREEN_BUTTONS];
+    int counter = 0;
+};
+
+tButtonList buttonList;
+
+void createButton(struct tBox box, void (*function)(), int color, String text, int textColor)
+{
+    struct tButton wip = {box, function, color, text, textColor, false};
+    buttonList.buttons[buttonList.counter] = wip;
+    buttonList.counter++;
+}
+
+void clearButtons()
+{
+    buttonList.counter = 0;
+}
+
+bool insideBox(int x, int y, tBox box)
+{
+    return x > box.x0 && x < box.x1 && y > box.y0 && y < box.y1;
+}
+
+#endif
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\ttgoGlovalDeclarations.ino"
+#ifndef ttgoGlovalDeclarations
+#define ttgoGlovalDeclarations
+
+// Must be defined before include LilyGoWatch librarie
+// Uncomment the line corresponding your T-Watch
+// #define LILYGO_WATCH_2019_WITH_TOUCH     // To use T-Watch2019 with touchscreen, please uncomment this line
+// #define LILYGO_WATCH_2019_NO_TOUCH    // To use T-Watch2019 Not touchscreen , please uncomment this line
+#define LILYGO_WATCH_2020_V1 //To use T-Watch2020, please uncomment this line
+
+
+#define LILYGO_WATCH_HAS_MOTOR
+#define LILYGO_WATCH_LVGL
+
+#include <LilyGoWatch.h>
+
+TTGOClass *ttgo;
+
+struct tPermanent
+{
+    int brightness = 255;
+    bool carillon = true;
+};
+
+RTC_DATA_ATTR tPermanent permanent;
+
+bool drawn = false;
+
+#endif
+
+
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\basicWatch\\utils.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\ttgoGlovalDeclarations.ino"
+
+#ifndef Utils
+#define Utils
+
+// cosas del asleep() para no molestar mientras duermes
+const int SleepingHours = 10;
+const int timeToSleep = 23;
+const int timeToWakeUp = 9;
+
+int planedDeepSleepTime = 0;
+int planedScreenSleepTime = 0;
+int planedButtonCoolDown = 0;
+int w, h;
+
+const int MaxBrightness = 255;
+const int MinBrightness = 10;
+const int brightnessBarMargin = 10;
+
+#define uS_TO_S_FACTOR 1000000ULL /* Conversion factor for micro seconds to seconds */
+
+int createRGB(int r, int g, int b)
+{
+    return ttgo->tft->color565(r, g, b);
+    //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
+}
+
+int RED_CANCEL;
+int GREEN_ALLOW;
+
+typedef enum
+{
+    none,
+    button
+} tInterrupt;
+tInterrupt interrupt = none;
+typedef enum
+{
+    launcher,
+
+    watch,
+    flashLight,
+    calculator,
+    countdown,
+    timer,
+    teamScores,
+    controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
+    unitConversor,
+
+} tApp;
+tApp app = watch;
+
+const int appCount = 9;
+
+const String AppToString[appCount] = {
+    "launcher",
+
+    "watch",
+    "flashLight",
+    "calculator", // demos and scientific
+    "countdown",
+    "timer",
+    "teamScores",
+    "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
+    "unitConversor",
+};
+
+void destructurateRGB(int col, int &r, int &g, int &b)
+{
+    b = col & 0x1F;
+    col >> 5;
+    g = col & 0x3F;
+    col >> 6;
+    r = col & 0x1F;
+
+    b = b << 3;
+    g = g << 2;
+    r = r << 3;
+}
+
+bool asleep(int h)
+{
+    return !(h > timeToWakeUp && h < timeToSleep);
+}
+
+void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
+{
+    RTC_Date ret = ttgo->rtc->getDateTime();
+
+    year = ret.year;
+    month = ret.month;
+    day = ret.day;
+    h = ret.hour;
+    m = ret.minute;
+    s = ret.second;
+}
+
+int getUsableTime()
+{
+    return millis() / 1000;
+    // int year, month, day, hour, minute, seconds;
+    // getTime(year, month, day, hour, minute, seconds);
+    // return seconds + 60 * (minute + 60 * (hour + 24 * (day + 30 * (month + 12 * (year - 2020)))));
+}
+
+void enterDeepSleep()
+{ // manage next automatic wakeup
+
+    Serial.println("starting deep sleep");
+
+    int year, month, day, hour, minute, seconds;
+    getTime(year, month, day, hour, minute, seconds);
+    if (permanent.carillon)
+    {
+        int waitTime = 0;
+
+        if (!asleep(hour + 1))
+        { // wake up next hour o'Clock
+            waitTime = ((60 - minute) * 60 - 60);
+        }
+        else
+        { // wake up tomorrow
+            waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
+        }
+
+        Serial.printf("Saldre del deep sleep %u \n", waitTime);
+
+        esp_sleep_enable_timer_wakeup(uS_TO_S_FACTOR * waitTime);
+    }
+    else
+    {
+        Serial.printf("no saldre del deep sleep automaticamente porque el carillon esta desactivado \n");
+    }
+
+    esp_deep_sleep_start();
+}
+
+void drawText(String t, int x, int y, int size, int font, int col)
+{
+    ttgo->tft->setTextColor(col);
+
+    ttgo->tft->setTextFont(size);
+    ttgo->tft->setTextSize(font);
+
+    ttgo->tft->setCursor(x, y);
+    ttgo->tft->println(t);
+}
+
+void ToggleOnOff()
+{
+
+    drawn = false;
+    app = watch;
+
+    ttgo->power->readIRQ();
+    if (ttgo->power->isPEKShortPressIRQ())
+    { // if short click turn off screen
+        ttgo->power->clearIRQ();
+        ttgo->bl->reverse();
+
+        if (ttgo->bl->isOn())
+        {
+            setCpuFrequencyMhz(240);
+            planedButtonCoolDown = getUsableTime() + 5;
+        }
+        else
+        {
+            planedDeepSleepTime = getUsableTime() + 15;
+            setCpuFrequencyMhz(80);
+        }
+    }
+    else
+    { // if long click enter deepSleep
+        ttgo->power->clearIRQ();
+        enterDeepSleep();
+    }
+}
+
+void interaction()
+{
+    int time = getUsableTime();
+    planedScreenSleepTime = time + 30;
+    planedDeepSleepTime = time + 45;
+}
+
+bool operator>(RTC_Date a, RTC_Date b)
+{
+    if (a.year > b.year)
+    {
+        return true;
+    }
+    else if (a.year == b.year)
+    {
+        if (a.month > b.month)
+        {
+            return true;
+        }
+        else if (a.month == b.month)
+        {
+            if (a.day > b.day)
+            {
+                return true;
+            }
+            else if (a.day == b.day)
+            {
+                if (a.hour > b.hour)
+                {
+                    return true;
+                }
+                else if (a.hour == b.hour)
+                {
+                    if (a.minute > b.minute)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if (a.minute == b.minute)
+                        {
+                            if (a.second > b.second)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+void carillon(int h)
+{
+    if (!permanent.carillon)
+        return;
+    ttgo->motor->onec(1000);
+    delay(2000);
+    // base 1
+    //while (h > 0)
+    // {
+    //   //Serial.println(h);
+
+    //   h--;
+    //   ttgo->motor->onec(100);
+    //   delay(400);
+    // }
+    // base 2
+
+    while (h > 0)
+    {
+        if (h % 2 == 1)
+        {
+            ttgo->motor->onec(700);
+            delay(1000);
+        }
+        else
+        {
+            ttgo->motor->onec(100);
+            delay(1000);
+        }
+        h /= 2;
+    }
+    interaction();
+}
+
+double angle(double a)
+{
+    while (a > 2 * PI)
+    {
+        a -= 2 * PI;
+    }
+    while (a < 0)
+    {
+        a += 2 * PI;
+    }
+    return a;
+}
+
+template <class T>
+T maximum(T a, T b)
+{
+    return a > b ? a : b;
+}
+
+template <class T>
+T minimum(T a, T b)
+{
+    return a < b ? a : b;
+}
+
+#endif

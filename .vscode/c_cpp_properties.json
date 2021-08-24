@@ -14,7 +14,8 @@
                 "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.0-rc1\\**",
                 "C:\\Program Files (x86)\\Arduino\\libraries\\**",
                 "C:\\Users\\Jaime\\Documents\\Arduino\\libraries\\**",
-                "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**"
+                "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**",
+                "C:/Users/Jaime/Documents/Arduino/libraries/TTGO_TWatch_Library-master/src"
             ],
             "forcedInclude": [],
             "cStandard": "c17",

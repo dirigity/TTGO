@@ -123,6 +123,7 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\basicWatch.ino.cpp.o: \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\variants\twatch/pins_arduino.h \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\ttgoGlovalDeclarations.ino \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/LilyGoWatch.h \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/board/twatch2020_v1.h \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/TTGO.h \
@@ -382,4 +383,6 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\basicWatch.ino.cpp.o: \
  c:\users\jaime\documents\arduino\libraries\ttgo_twatch_library-master\src\lvgl\lvgl.h \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/axp/axp20x.h \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/i2c/i2c_bus.h \
- C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/tft/bl.h
+ C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/tft/bl.h \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\buttonSistem.ino \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\utils.ino
