@@ -2,35 +2,11 @@
 #include "C:\Users\Jaime\Desktop\TTGO\basicWatch\buttonSistem.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\basicWatch\utils.ino"
 
+// apps
 
-const double secondsMstart = .15;
-const double secondsMend = .3;
-
-const double minuteMstart = .35;
-const double minuteMend = .5;
-
-const double hourMstart = .55;
-const double hourMend = .75;
-
-const double battMstart = .8;
-const double battMend = .9;
-
-const double ringMstart = .95;
-const double ringMend = .99;
-
-// calculations
-
-const double midSecondsM = (secondsMstart + secondsMend) / 2;
-const double secondsMThickness = secondsMend - secondsMstart;
-
-const double midMinuteM = (minuteMstart + minuteMend) / 2;
-const double minuteMThickness = minuteMend - minuteMstart;
-
-const double midHourM = (hourMstart + hourMend) / 2;
-const double hourMThickness = hourMend - hourMstart;
-
-const double midBattM = (battMstart + battMend) / 2;
-const double battMThickness = battMend - battMstart;
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\appWatch.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\appTimer.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\basicWatch\appControlPannel.ino"
 
 void setup()
 {
@@ -50,6 +26,8 @@ void setup()
 
   w = ttgo->tft->width();
   h = ttgo->tft->height();
+
+  FULL_SCREEN_BOX = {0, 0, w, h}
 
   RED_CANCEL = createRGB(255, 70, 70);
   GREEN_ALLOW = createRGB(70, 255, 70);
@@ -87,89 +65,6 @@ void setup()
   Serial.printf("Setup done!! \n");
 }
 
-void drawPolarSegment(double angle, double startM, double endM, int col) //, int darkerCol)
-{
-  int x0 = w / 2 + sin(angle) * startM;
-  int y0 = h / 2 - cos(angle) * startM;
-  int x1 = w / 2 + sin(angle) * endM;
-  int y1 = h / 2 - cos(angle) * endM;
-
-  ttgo->tft->drawLine(x0, y0, x1, y1, col);
-  ttgo->tft->drawLine(x0 + 1, y0, x1 + 1, y1, col);
-  ttgo->tft->drawLine(x0, y0 + 1, x1, y1 + 1, col);
-}
-
-double capRoundFunctionCeroToOne(double i)
-{
-  return sqrt(1 - (i * i));
-}
-
-double CapRoundness(double in, double midRad, double Thickness)
-{
-
-  double perimeter = 2 * PI * midRad;
-  double perimeterRadiousRelation = 1 - (Thickness / perimeter);
-
-  if (in < perimeterRadiousRelation)
-  {
-    return 1;
-  }
-  else
-  {
-    //return .5;
-    double i = (in - perimeterRadiousRelation) / (Thickness / perimeter);
-
-    return capRoundFunctionCeroToOne(i);
-  }
-}
-
-void manageDisc(double clockAngle, double timeAngle, double midsM, double MThickness, int r, int g, int b)
-{
-  double Intensity = angle(clockAngle - timeAngle) / (2 * PI);
-  //double Intensity_ = max(0., Intensity - 0.01);
-  double CurrentCapRoundness = CapRoundness(Intensity, midsM, MThickness);
-  double Mstart_ = midsM - MThickness / 2 * CurrentCapRoundness;
-  double Mend_ = midsM + MThickness / 2 * CurrentCapRoundness;
-
-  if (CurrentCapRoundness != 1)
-  {
-    drawPolarSegment(clockAngle, h / 2 * (midsM - MThickness / 2), h / 2 * midsM + MThickness / 2, TFT_BLACK);
-  }
-
-  drawPolarSegment(clockAngle, h / 2 * Mstart_, h / 2 * Mend_, createRGB(Intensity * r, Intensity * g, Intensity * b));
-}
-
-void drawButtons()
-{
-  for (int i = 0; i < buttonList.counter; i++)
-  {
-    const int borderSize = 2;
-    const tButton b = buttonList.buttons[i];
-    int r, g, blue;
-    destructurateRGB(b.color, r, g, blue);
-    int k = 40;
-    int borderCol = createRGB(max(0, r - k), max(0, g - k), max(0, blue - k));
-    int fillCol = b.color;
-
-    if (b.pressed)
-    {
-      int kk = borderCol;
-      borderCol = fillCol;
-      fillCol = kk;
-    }
-
-    ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, borderCol);
-    ttgo->tft->fillRect(b.box.x0 + borderSize, b.box.y0 + borderSize, b.box.x1 - b.box.x0 - borderSize * 2, b.box.y1 - b.box.y0 - borderSize * 2, fillCol);
-    drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, 2, 2, b.textColor);
-  }
-}
-double secondDrawingAngle = 0;
-double minuteDrawingAngle = 0;
-double hourDrawingAngle = 0;
-double battDrawingAngle = 0;
-
-double battAngle = 0;
-
 int startClickX = -1;
 int startClickY = -1;
 
@@ -182,7 +77,7 @@ bool fingerDown = false;
 
 void onfingerDown(int x, int y)
 {
-  Serial.printf("finger down x: %d y:%d \n", x, y);
+  //Serial.printf("finger down x: %d y:%d \n", x, y);
   startClickX = x;
   startClickY = y;
 }
@@ -258,7 +153,7 @@ void onfingerDrag(int x, int y)
 void onfingerUp(int x, int y)
 {
 
-  Serial.printf("finger up x: %d y:%d \n", x, y);
+  //Serial.printf("finger up x: %d y:%d \n", x, y);
   //Serial.printf("vertical distance entre touches: %d \n ", y-startClickY);
 
   bool InsideAButton = false;
@@ -292,15 +187,7 @@ void onfingerUp(int x, int y)
         return;
       }
     }
-    if (app == flashLight)
-    {
-      app = launcher;
-      drawn = false;
-      selected = -1;
-      ttgo->bl->adjust(permanent.brightness);
 
-      return;
-    }
     if (app == launcher && selected >= 0)
     {
       app = tApp(selected + 1);
@@ -311,22 +198,6 @@ void onfingerUp(int x, int y)
     }
   }
 }
-
-int startTimerTime = 0;
-int stopedTimerTime = 0;
-int currentlyDrawnSecondsSinceStart = 0;
-int TimerRuning = false;
-int LapTimes[5] = {0};
-int lastLapTime = -1;
-
-const int MaxStoredLaps = 5;
-struct tLapList
-{
-  char laps[MaxStoredLaps][25];
-  int counter = 0;
-};
-
-tLapList lapList;
 
 void loop()
 {
@@ -400,222 +271,43 @@ void loop()
     {
 
     case calculator:
-    {
       break;
-    }
+
     case countdown:
-    {
       break;
-    }
+
     case timer:
-    {
-      const int posX = 20;
-      const int posY = 20;
-      //Serial.println("timer loop");
-      if (!drawn)
-      {
-        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        for (int i = 0; i < lapList.counter; i++)
-        {
-          drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
-        }
-
-        tBox boxStartAndStop = {20, 190, w / 2 - 20, 225};
-        tBox boxLapAndReset = {w / 2 + 20, 190, w - 20, 225};
-        if (!TimerRuning)
-        {
-          createButton(
-              boxStartAndStop, []
-              {
-                if (startTimerTime == 0)
-                {
-                  startTimerTime = getUsableTime();
-                }
-                else
-                {
-                  startTimerTime = getUsableTime() - (stopedTimerTime - startTimerTime);
-                }
-                TimerRuning = true;
-                drawn = false;
-                currentlyDrawnSecondsSinceStart = -1;
-              },
-              GREEN_ALLOW, "Start", 0x0000);
-          createButton(
-              boxLapAndReset, []
-              {
-                startTimerTime = 0;
-                stopedTimerTime = 0;
-                TimerRuning = false;
-                drawn = false;
-                ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-                drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
-                currentlyDrawnSecondsSinceStart = -1;
-
-                lastLapTime = -1;
-                lapList.counter = 0;
-                ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
-              },
-              RED_CANCEL, "Reset", 0x0000);
-        }
-        else
-        {
-          createButton(
-              boxStartAndStop, []
-              {
-                stopedTimerTime = getUsableTime();
-                TimerRuning = false;
-                drawn = false;
-                currentlyDrawnSecondsSinceStart = -1;
-              },
-              RED_CANCEL, "Stop", 0x0000);
-          createButton(
-              boxLapAndReset, []
-              {
-                if (lapList.counter == MaxStoredLaps)
-                {
-
-                  for (int i = 1; i < MaxStoredLaps; i++)
-                  {
-                    int dst = i - 1;
-                    int src = i;
-
-                    for (int j = 0; j < 25; j++)
-                    {
-                      lapList.laps[dst][j] = lapList.laps[src][j];
-                    }
-                  }
-
-                  lapList.counter--;
-                }
-                int secondsSinceStart = getUsableTime() - startTimerTime;
-                int hoursSinceStart = secondsSinceStart / 3600;
-                int minutesSinceStart = (secondsSinceStart % 3600) / 60;
-                int seconds = secondsSinceStart % 60;
-
-                int diferenceFromLast = 0;
-                if (lastLapTime != -1)
-                {
-                  diferenceFromLast = getUsableTime() - lastLapTime;
-                  sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d (+%d) ", hoursSinceStart, minutesSinceStart, seconds, diferenceFromLast);
-                }
-                else
-                {
-                  sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d ", hoursSinceStart, minutesSinceStart, seconds);
-                }
-
-                lastLapTime = getUsableTime();
-
-                lapList.counter++;
-
-                ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
-
-                for (int i = 0; i < lapList.counter; i++)
-                {
-                  drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
-                }
-              },
-              createRGB(255, 255, 30), "Lap", 0x0000);
-        }
-        if (startTimerTime == 0)
-        {
-          ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-          drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
-        }
-      }
-      int secondsSinceStart;
-      if (TimerRuning)
-        secondsSinceStart = UsableTime - startTimerTime;
-      else
-        secondsSinceStart = stopedTimerTime - startTimerTime;
-
-      // Serial.println("secondsSinceStart");
-      // Serial.println(secondsSinceStart);
-      // Serial.println("TimerRuning");
-      // Serial.println(TimerRuning);
-      // Serial.println("currentlyDrawnSecondsSinceStart");
-      // Serial.println(currentlyDrawnSecondsSinceStart);
-
-      if (secondsSinceStart != currentlyDrawnSecondsSinceStart)
-      {
-        currentlyDrawnSecondsSinceStart = secondsSinceStart;
-        int hoursSinceStart = secondsSinceStart / 3600;
-        int minutesSinceStart = (secondsSinceStart % 3600) / 60;
-        int seconds = secondsSinceStart % 60;
-
-        char buff[10];
-        sprintf(buff, "%02d:%02d:%02d", hoursSinceStart, minutesSinceStart, seconds);
-        //printf("[%d] %d:%d:%d \n", secondsSinceStart, hoursSinceStart, minutesSinceStart, seconds);
-        //Serial.printf("%s la hora /n",buff)
-        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        drawText(String(buff), posX, posY, 4, 2, 0xFFFF);
-      }
-
+      timerTick(UsableTime);
       break;
-    }
+
     case teamScores:
-    {
       break;
-    }
+
     case controlPannel:
-    {
-      if (!drawn)
-      {
-        // carrillon
-        tBox box = {10, 10, w - 10, 45};
-        if (permanent.carillon)
-          createButton(
-              box, []
-              {
-                permanent.carillon = false;
-                drawn = false;
-              },
-              GREEN_ALLOW, "Apagar Carillon", createRGB(0, 0, 0));
-        else
-          createButton(
-              box, []
-              {
-                permanent.carillon = true;
-                drawn = false;
-              },
-              RED_CANCEL, "Activar Carillon", createRGB(255, 255, 255));
-
-        // brigness bar
-
-        const int barHeight = 70;
-
-        ttgo->tft->drawLine(brightnessBarMargin, barHeight, w - brightnessBarMargin, barHeight, 0xFFFF);
-
-        double normalizedBrightness = (double(permanent.brightness - MinBrightness) / double(MaxBrightness - MinBrightness));
-        //Serial.println(normalizedBrightness);
-        ttgo->tft->fillCircle(brightnessBarMargin + double(w - (brightnessBarMargin * 2)) * normalizedBrightness, barHeight, 10, 0xFFFF);
-        ttgo->bl->adjust(permanent.brightness);
-
-        // exit button
-        tBox boxExit = {10, 100, w - 10, 135};
-        createButton(
-            boxExit, []
-            {
-              app = launcher;
-              drawn = false;
-            },
-            createRGB(255, 255, 255), "Back", 0x0000);
-      }
-
+      controlPannelTick();
       break;
-    }
+
     case unitConversor:
-    {
       break;
-    }
+
     case flashLight:
-    {
+
       if (!drawn)
       {
         ttgo->bl->adjust(255);
         ttgo->tft->fillScreen(0xFFFF);
+        createButton(
+            FULL_SCREEN_BOX, []
+            {
+              app = launcher;
+              drawn = false;
+              selected = -1;
+              ttgo->bl->adjust(permanent.brightness);
+            },
+            0, "", 0, false);
       }
       break;
-    }
+
     case launcher:
     {
       if (!drawn)
@@ -635,97 +327,7 @@ void loop()
     }
     case watch:
     {
-
-      // sleep after some time without activity;
-      {
-        if (planedScreenSleepTime < UsableTime)
-        {
-          ttgo->bl->off();
-          setCpuFrequencyMhz(80);
-        }
-
-        if (planedDeepSleepTime < UsableTime)
-        { // 30s despues de apagar la pantalla entrar en sueño profundo
-          enterDeepSleep();
-        }
-      }
-
-      // draw corona
-      if (!drawn)
-      {
-        //Serial.println("[START] drawing corona");
-        int ringMmid = (ringMend + ringMstart) / 2 * h / 2;
-
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMend / 2, createRGB(50, 50, 50));
-        ttgo->tft->fillCircle(w / 2, h / 2, h * ringMstart / 2, 0x0000);
-
-        for (int i = 0; i < 60; i++)
-        {
-          double angle = 2 * PI / 60 * i;
-          ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 2, 0x0000);
-          //Serial.println(double(h) * sin(angle));
-        }
-
-        for (int i = 0; i < 12; i++)
-        {
-          double angle = 2 * PI / 12 * i;
-          if (i % 3 == 0)
-            ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(200, 200, 200));
-          else
-            ttgo->tft->fillCircle(w / 2 + ringMmid * sin(angle), h / 2 + ringMmid * cos(angle), 4, createRGB(150, 150, 150));
-
-          //Serial.println(double(h) * sin(angle));
-        }
-
-        //Serial.println("[DONE] drawing corona");
-      }
-
-      double secondAngle = double(seconds) / 60. * 2. * PI;
-      double minuteAngle = double(minute) / 60. * 2. * PI + secondAngle / 60.;
-      double hourAngle = double(hour) / 12. * 2. * PI + minuteAngle / 12.;
-      if (battAngle == 0)
-      {
-        battAngle = (ttgo->power->getBattPercentage() / 100. * 2. * PI);
-      }
-      else
-      {
-        battAngle = battAngle * 0.95 + (ttgo->power->getBattPercentage() / 100. * 2. * PI) * 0.05;
-      }
-
-      // draw gradient circles
-      {
-        for (int i = 0; i < 200; i++)
-        {
-          secondDrawingAngle += 0.03123123;
-          secondDrawingAngle = angle(secondDrawingAngle);
-          manageDisc(secondDrawingAngle, secondAngle, midSecondsM, secondsMThickness, 0, 0, 255);
-        }
-
-        for (int i = 0; i < (drawn ? 40 : 300); i++)
-        {
-          minuteDrawingAngle += 0.02123123;
-          minuteDrawingAngle = angle(minuteDrawingAngle);
-          manageDisc(minuteDrawingAngle, minuteAngle, midMinuteM, minuteMThickness, 0, 0, 255);
-        }
-
-        for (int i = 0; i < (drawn ? 40 : 700); i++)
-        {
-          hourDrawingAngle += 0.01123123;
-          hourDrawingAngle = angle(hourDrawingAngle);
-          manageDisc(hourDrawingAngle, hourAngle, midHourM, hourMThickness, 0, 0, 255);
-        }
-
-        for (int i = 0; i < (drawn ? 40 : 700); i++)
-        {
-          battDrawingAngle += 0.01123123;
-          battDrawingAngle = angle(battDrawingAngle);
-          if (battAngle < 1)
-            manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 255, 0, 0);
-          else
-            manageDisc(battDrawingAngle, battAngle, midBattM, battMThickness, 0, 0, 255);
-        }
-      }
-
+      watchTick(year, month, day, hour, minute, seconds, UsableTime);
       break;
     }
     }

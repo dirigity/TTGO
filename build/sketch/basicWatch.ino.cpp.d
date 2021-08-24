@@ -385,4 +385,7 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\basicWatch.ino.cpp.o: \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/i2c/i2c_bus.h \
  C:\Users\Jaime\Documents\Arduino\libraries\TTGO_TWatch_Library-master\src/drive/tft/bl.h \
  C:\Users\Jaime\Desktop\TTGO\basicWatch\buttonSistem.ino \
- C:\Users\Jaime\Desktop\TTGO\basicWatch\utils.ino
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\utils.ino \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\appWatch.ino \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\appTimer.ino \
+ C:\Users\Jaime\Desktop\TTGO\basicWatch\appControlPannel.ino
