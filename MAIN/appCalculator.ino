@@ -22,6 +22,8 @@ static const char *errors[] = {
 //   Simple expression evaluator
 // ================================
 
+double Gloval_X_Value = 0;
+
 // Error codes
 enum EXPR_EVAL_ERR
 {
@@ -77,7 +79,14 @@ private:
             return negative ? -res : res;
         }
 
-        // It should be a number; convert it to double
+        // It should be a number or an x; convert it to double
+
+        if (*expr == 'x')
+        {
+            expr++;
+            return negative ? -Gloval_X_Value : Gloval_X_Value;
+        }
+
         char *end_ptr;
         double res = strtod(expr, &end_ptr);
         if (end_ptr == expr)
@@ -183,7 +192,7 @@ const int MaxInputStringSize = 300;
 
 char buff[MaxInputStringSize] = "";
 
-const int plotXres = 50;
+const int plotXres = 100;
 
 double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, double EndRangeDst, double val)
 {
@@ -211,24 +220,24 @@ void plot(double MinX_, double MinY_, double MaxX_, double MaxY_)
 
             bool exit = true;
 
-            if (x > w * 4 / 5)
+            if (x > w * 2 / 3) // derecha
             {
                 plot(MinX + displacement, MinY, MaxX + displacement, MaxY);
                 exit = false;
             }
-            if (x < w / 5)
+            if (x < w / 3) // izq
             {
                 plot(MinX - displacement, MinY, MaxX - displacement, MaxY);
                 exit = false;
             }
-            if (y > h * 4 / 5)
-            {
-                plot(MinX, MinY - displacement, MaxX, MaxY - displacement);
-                exit = false;
-            }
-            if (y < h / 5)
+            if (y > h * 2 / 3) // abajo
             {
                 plot(MinX, MinY + displacement, MaxX, MaxY + displacement);
+                exit = false;
+            }
+            if (y < h / 3) // arriba
+            {
+                plot(MinX, MinY - displacement, MaxX, MaxY - displacement);
                 exit = false;
             }
 
@@ -245,59 +254,62 @@ void plot(double MinX_, double MinY_, double MaxX_, double MaxY_)
     const int lastLineX = ceil(MaxX);
     for (int i = firstLineX; i < lastLineX; i++)
     {
-        int linePos = map(MinX, MaxX, 0, w, i);
+        int lineX = map(MinX, MaxX, 0, w, i);
         int col = i == 0 ? 0 : createRGB(220, 220, 220);
-        ttgo->tft->drawFastHLine(0, linePos, w, col);
+        ttgo->tft->drawFastVLine(lineX, 0, h, col);
     }
+
+    // horizontal
 
     const int firstLineY = floor(MinY);
     const int lastLineY = ceil(MaxY);
     for (int i = firstLineY; i < lastLineY; i++)
     {
-        int linePos = map(MinY, MaxY, 0, w, i);
+        int lineY = map(MinY, MaxY, 0, w, i);
         int col = i == 0 ? 0 : createRGB(220, 220, 220);
-        ttgo->tft->drawFastVLine(linePos, 0, h, col);
+        ttgo->tft->drawFastHLine(0, lineY, w, col);
     }
+
+    // numba
 
     // draw curve
 
     int lastDrawnX = -100;
     int lastDrawnY = -100;
 
-    for (int i = 0; i < plotXres; i++)
+    for (int i = 0; i < plotXres + 1; i++)
     {
-        char substitution[MaxInputStringSize];
-        const int NumberLenght = 20;
-        char Xvalue[NumberLenght];
         double currentX = double(i) / plotXres * zoomX + MinX;
-        snprintf(Xvalue, NumberLenght - 1, "%.4f", currentX);
-        int valueSize = strlen(Xvalue);
-        strcpy(substitution, buff);
-
+        Gloval_X_Value = currentX;
+        //char substitution[MaxInputStringSize];
+        //const int NumberLenght = 20;
+        //char Xvalue[NumberLenght];
+        //snprintf(Xvalue, NumberLenght - 1, "(%.4f)", currentX);
+        //int valueSize = strlen(Xvalue);
+        //strcpy(substitution, buff);
         // substitute 'x' by valueSize
-
-        for (int i = 0; i < strlen(substitution); i++)
-        {
-            if (substitution[i] == 'x')
-            {
-
-                // shift right from the end of the array to the position of the 'x'
-
-                for (int j = strlen(substitution); j > i; j--)
-                {
-                    substitution[j + valueSize] = substitution[j];
-                }
-
-                for (int j = 0; j < valueSize; j++)
-                {
-                    substitution[j + i] = Xvalue[i];
-                }
-            }
-        }
+        //Serial.printf("the string of the number is:\"%s\" and has size %d \n", Xvalue, valueSize);
+        // for (int i = 0; i < strlen(substitution); i++)
+        // {
+        //     if (substitution[i] == 'x')
+        //     {
+        //         Serial.printf("found an x at pos: %d \n", i);
+        //         //shift right from the end of the array to the position of the 'x'
+        //         for (int j = strlen(substitution) + 1; j > i; j--)
+        //         {
+        //             substitution[j + valueSize] = substitution[j];
+        //         }
+        //         Serial.printf("after shifting: \"%s\"\n", substitution);
+        //         for (int j = 0; j < valueSize; j++)
+        //         {
+        //             substitution[j + i] = Xvalue[j];
+        //         }
+        //         Serial.printf("after substitution: \"%s\"\n", substitution);
+        //     }
+        // }
 
         ExprEval eval;
         double res = eval.Eval(buff);
-        double Yval = 0;
 
         if (eval.GetErr() != EEE_NO_ERROR)
         {
@@ -306,10 +318,11 @@ void plot(double MinX_, double MinY_, double MaxX_, double MaxY_)
         else
         {
             int currentDrawingX = map(MinX, MaxX, 0, w, currentX);
-            int currentDrawingY = map(MinY, MaxY, h, 0, res);
+            int currentDrawingY = map(MinY, MaxY, 0, h, -res);
 
             ttgo->tft->drawLine(lastDrawnX, lastDrawnY, currentDrawingX, currentDrawingY, createRGB(40, 0, 0));
-
+            ttgo->tft->drawLine(lastDrawnX, lastDrawnY + 1, currentDrawingX, currentDrawingY + 1, createRGB(40, 0, 0));
+            ttgo->tft->drawLine(lastDrawnX, lastDrawnY - 1, currentDrawingX, currentDrawingY - 1, createRGB(40, 0, 0));
             lastDrawnX = currentDrawingX;
             lastDrawnY = currentDrawingY;
         }
@@ -320,15 +333,23 @@ const int buttonMidleSeparation = 140;
 
 void CalculatorTick()
 {
-    const tBox textDisplay = {10, 10, w - 10, 60};
-    const tBox equalsBox = {10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
-    const tBox CEBox = {w / 2 + 5, 70, w - 10, buttonMidleSeparation};
-    const tBox BackSpaceBox = {10, 70, w / 2 - 5, buttonMidleSeparation};
-    const tBox graphingBox = {w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
+
+    const tGrid MainGrid = createGrid(FULL_SCREEN_BOX, 10, 10, 2, 4);
+
+    const tBox textDisplay = boxMerge(Cell(MainGrid, 0, 0), Cell(MainGrid, 1, 0));
+    const tBox equalsBox = Cell(MainGrid, 0, 2);        //{10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
+    const tBox CEBox = Cell(MainGrid, 1, 1);            //{w / 2 + 5, 70, w - 10, buttonMidleSeparation};
+    const tBox BackSpaceBox = Cell(MainGrid, 0, 1);     //{10, 70, w / 2 - 5, buttonMidleSeparation};
+    const tBox graphingBox = Cell(MainGrid, 1, 2);      //{w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
+    const tBox exitBox = boxMerge(Cell(MainGrid, 0, 3), Cell(MainGrid, 1, 3));
 
     if (!drawn)
     {
         ttgo->tft->fillRect(10, 10, 40, 40, TFT_WHITE);
+        createButton(
+            exitBox, onUp, [](int x, int y)
+            { goToLauncher(); },
+            RED_CANCEL, "Exit", TFT_WHITE);
         createButton(
             textDisplay, onUp, [](int x, int y)
             {

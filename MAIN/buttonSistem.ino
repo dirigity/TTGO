@@ -36,6 +36,15 @@ struct tButton
     bool draw;
 };
 
+struct tGrid
+{
+    tBox box;
+    int marginInside;
+    int marginOutside;
+    int w;
+    int h;
+};
+
 const int MAX_ONSCREEN_BUTTONS = 10;
 struct tButtonList
 {
@@ -44,6 +53,67 @@ struct tButtonList
 };
 
 tButtonList buttonList;
+
+tGrid createGrid(tBox box, int marginInside, int marginOutside, int w, int h)
+{
+    return {box, marginInside, marginOutside, w, h};
+}
+
+tBox boxMerge(tBox A, tBox B)
+{
+    return {min(A.x0, B.x0), min(A.y0, B.y0), max(A.x1, B.x1), max(A.y1, B.y1)};
+}
+
+tBox Cell(tGrid grid, int x, int y)
+{
+    tBox ret;
+
+    int baseX = grid.box.x0;
+    int baseY = grid.box.y0;
+
+    int TrueW = (grid.box.x1 - grid.box.x0) / grid.w;
+    int TrueH = (grid.box.y1 - grid.box.y0) / grid.h;
+
+    ret.x0 = baseX + TrueW * x;
+    ret.x1 = baseX + TrueW * (x + 1);
+
+    ret.y0 = baseY + TrueH * y;
+    ret.y1 = baseY + TrueH * (y + 1);
+
+    if (x == 0)
+    {
+        ret.x0 += grid.marginOutside;
+        ret.x1 -= grid.marginInside / 2;
+    }
+    else if (x == grid.w - 1)
+    {
+        ret.x0 += grid.marginInside / 2;
+        ret.x1 -= grid.marginOutside;
+    }
+    else
+    {
+        ret.x0 += grid.marginInside / 2;
+        ret.x1 -= grid.marginInside / 2;
+    }
+
+    if (y == 0)
+    {
+        ret.y0 += grid.marginOutside;
+        ret.y1 -= grid.marginInside / 2;
+    }
+    else if (y == grid.h - 1)
+    {
+        ret.y0 += grid.marginInside / 2;
+        ret.y1 -= grid.marginOutside;
+    }
+    else
+    {
+        ret.y0 += grid.marginInside / 2;
+        ret.y1 -= grid.marginInside / 2;
+    }
+
+    return ret;
+}
 
 void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, String text, int textColor)
 {
@@ -74,7 +144,8 @@ bool insideBox(int x, int y, tBox box)
     return ret;
 }
 
-void drawBox(tBox box, int col){
+void drawBox(tBox box, int col)
+{
     ttgo->tft->fillRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0, col);
 }
 
