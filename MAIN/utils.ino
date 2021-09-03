@@ -23,6 +23,16 @@ const char *monthsToWord[] = {
     "Nob",
     "Dec"};
 
+const char *WeekDaysToWord[] = {
+    "none",
+    "Lun",
+    "Mar",
+    "Mie",
+    "Jue",
+    "Vie",
+    "Sab",
+    "Dom"};
+
 int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
@@ -61,6 +71,15 @@ void destructurateRGB(int col, int &r, int &g, int &b)
     b = b << 3;
     g = g << 2;
     r = r << 3;
+}
+
+char toLowerChar(char c)
+{
+    if (c >= 'A' && c <= 'Z')
+    {
+        return c - 'A' + 'a';
+    }
+    return c;
 }
 
 bool asleep(int h)
@@ -120,7 +139,7 @@ void enterDeepSleep()
     esp_deep_sleep_start();
 }
 
-void drawText(String t, int x, int y, int size, int font, int col)
+void drawText(const char *t, int x, int y, int size, int font, int col)
 {
     ttgo->tft->setTextColor(col);
 

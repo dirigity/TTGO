@@ -11,6 +11,7 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\logger.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 
 void setup()
 {
@@ -263,7 +264,12 @@ void loop()
       controlPannelTick();
       break;
 
-    case unitConversor:
+    case baseConversor:
+      baseConversorTick();
+      break;
+
+    case morse:
+      MorseTick();
       break;
 
     case flashLight:

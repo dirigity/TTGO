@@ -13,28 +13,8 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\logger.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 
-#line 15 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void setup();
-#line 79 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerDown(int x, int y);
-#line 98 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerDrag(int x, int y);
-#line 131 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerUp(int x, int y);
-#line 154 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void ManageTouch();
-#line 183 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void loop();
-#line 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
-void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds);
-#line 11 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void reset();
-#line 22 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void redrawScores();
-#line 33 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void TeamScoresTick();
-#line 15 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void setup()
 {
   Serial.begin(115200);
@@ -286,7 +266,12 @@ void loop()
       controlPannelTick();
       break;
 
-    case unitConversor:
+    case baseConversor:
+      baseConversorTick();
+      break;
+
+    case morse:
+      MorseTick();
       break;
 
     case flashLight:
@@ -370,6 +355,86 @@ void loop()
 //TFT_SKYBLUE (#87CEEB)
 //TFT_VIOLET (#B42EE2)
 
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appBaseConversion.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\buttonSistem.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
+
+#include <stdlib.h> /* strtol */
+
+#ifndef appBaseConversion
+#define appBaseConversion
+
+char Dec[20] = "Dec";
+char Hex[20] = "Hex";
+char Bin[20] = "Bin";
+char *removed0 = Bin;
+char Oct[20] = "Oct";
+
+int value = 0;
+
+void refresh(int base)
+{
+    char buff[20] = "";
+
+    OCRstart(buff, 99);
+    value = strtol(buff, nullptr, base);
+
+    sprintf(Dec, "%d", value);
+    sprintf(Hex, "0x%X", value);
+    sprintf(Oct, "0%o", value);
+
+    Bin[0] = '\0';
+
+    for (int z = (32768 / 8); z > 0; z >>= 1)
+    {
+        strcat(Bin, ((value & z) == z) ? "1" : "0");
+    }
+
+    removed0 = Bin;
+    while (*removed0 == '0')
+    {
+        removed0++;
+    }
+    if(*removed0 == '\0'){
+        removed0--;
+    }
+    invalidate = true;
+}
+
+void baseConversorTick()
+{
+
+    if (!drawn)
+    {
+
+        tGrid layout = createGrid(FULL_SCREEN_BOX, 10, 10, 1, 4);
+        tBox DecBox = Cell(layout, 0, 0);
+        tBox HexBox = Cell(layout, 0, 1);
+        tBox BinBox = Cell(layout, 0, 3);
+        tBox OctBox = Cell(layout, 0, 2);
+
+        createButton(
+            DecBox, onUp, [](int x, int y)
+            { refresh(10); },
+            TFT_WHITE, Dec, TFT_BLACK);
+        createButton(
+            HexBox, onUp, [](int x, int y)
+            { refresh(16); },
+            TFT_WHITE, Hex, TFT_BLACK);
+        createButton(
+            BinBox, onUp, [](int x, int y)
+            { refresh(2); },
+            TFT_WHITE, removed0, TFT_BLACK);
+        createButton(
+            OctBox, onUp, [](int x, int y)
+            { refresh(8); },
+            TFT_WHITE, Oct, TFT_BLACK);
+    }
+}
+
+#endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalculator.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
@@ -710,10 +775,10 @@ void CalculatorTick()
     const tGrid MainGrid = createGrid(FULL_SCREEN_BOX, 10, 10, 2, 4);
 
     const tBox textDisplay = boxMerge(Cell(MainGrid, 0, 0), Cell(MainGrid, 1, 0));
-    const tBox equalsBox = Cell(MainGrid, 0, 2);        //{10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
-    const tBox CEBox = Cell(MainGrid, 1, 1);            //{w / 2 + 5, 70, w - 10, buttonMidleSeparation};
-    const tBox BackSpaceBox = Cell(MainGrid, 0, 1);     //{10, 70, w / 2 - 5, buttonMidleSeparation};
-    const tBox graphingBox = Cell(MainGrid, 1, 2);      //{w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
+    const tBox equalsBox = Cell(MainGrid, 0, 2);    //{10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
+    const tBox CEBox = Cell(MainGrid, 1, 1);        //{w / 2 + 5, 70, w - 10, buttonMidleSeparation};
+    const tBox BackSpaceBox = Cell(MainGrid, 0, 1); //{10, 70, w / 2 - 5, buttonMidleSeparation};
+    const tBox graphingBox = Cell(MainGrid, 1, 2);  //{w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
     const tBox exitBox = boxMerge(Cell(MainGrid, 0, 3), Cell(MainGrid, 1, 3));
 
     if (!drawn)
@@ -722,38 +787,11 @@ void CalculatorTick()
         createButton(
             exitBox, onUp, [](int x, int y)
             { goToLauncher(); },
-            RED_CANCEL, "Exit", TFT_WHITE);
+            RED_CANCEL, "Exit", TFT_BLACK);
         createButton(
             textDisplay, onUp, [](int x, int y)
             {
-                bool stop = false;
-                while (!stop)
-                {
-                    char next = CallOCR();
-                    if (next == '_')
-                    {
-                        stop = true;
-                    }
-                    else if (next == '?')
-                    {
-                        ttgo->motor->onec(10);
-                    }
-                    else
-                    {
-                        int CeroIdx = strlen(buff);
-                        if (CeroIdx != MaxInputStringSize - 1)
-                        {
-                            buff[CeroIdx] = next;
-                            buff[CeroIdx + 1] = '\0';
-                        }
-                        else
-                        {
-                            buff[MaxInputStringSize - 1] = '\0';
-                        }
-
-                        Serial.println(buff);
-                    }
-                }
+                OCRstart(buff, MaxInputStringSize);
                 drawn = false;
             },
             TFT_WHITE, buff, TFT_BLACK);
@@ -803,15 +841,15 @@ void CalculatorTick()
     //Serial.printf("calculator tick %d \n", drawn);
 }
 
-double ParseAtom(char *&expr)
-{
-    // Read the number from string
-    char *end_ptr;
-    double res = strtod(expr, &end_ptr);
-    // Advance the pointer and return the result
-    expr = end_ptr;
-    return res;
-}
+// double ParseAtom(char *&expr)
+// {
+//     // Read the number from string
+//     char *end_ptr;
+//     double res = strtod(expr, &end_ptr);
+//     // Advance the pointer and return the result
+//     expr = end_ptr;
+//     return res;
+// }
 
 #endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appControlPannel.ino"
@@ -908,13 +946,13 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
         snprintf(info, buffLenght,
                  "year: %d  \n"
                  "month: %s %02d \n"
-                 "day: %02d \n"
+                 "day: %02d (%s)\n"
                  "time: %02d:%02d:%02d \n"
                  "power: %.2fV\n"
                  "batt: %02d%%\n"
                  "chargeing: %s\n",
-                 year, monthsToWord[month], month, day, hour, minute, seconds, ttgo->power->getBattVoltage() / 1000., getBatteryCorrectedPorcentage(), ttgo->power->isChargeing() ? "True":"False");
-        drawText(String(info), 0, 0, 2, 2, TFT_WHITE);
+                 year, monthsToWord[month], month, day, WeekDaysToWord[ttgo->rtc->getDayOfWeek(day, month, year)], hour, minute, seconds, ttgo->power->getBattVoltage() / 1000., getBatteryCorrectedPorcentage(), ttgo->power->isChargeing() ? "True" : "False");
+        drawText(info, 0, 0, 2, 2, TFT_WHITE);
 
         lastDrawnTime = seconds;
     }
@@ -937,10 +975,10 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
 // launcher app
 int selected = -1;
 
-const int appCount = 12;
+const int appCount = 14;
 const int skipedApps = 2;
 
-const String AppToString[appCount] = {
+const char *AppToString[appCount] = {
     "launcher",
     "OCR",
 
@@ -952,7 +990,9 @@ const String AppToString[appCount] = {
     "timer",
     "teamScores",
     "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-    "unitConversor",
+    "baseConversor",
+    "morse",
+    "calendar",
     "turnOff"};
 
 void goToLauncher()
@@ -1004,6 +1044,366 @@ void launcherTick()
 
 #endif
 
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\buttonSistem.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
+//#include <string.h>
+
+#ifndef appMorse
+#define appMorse
+
+char text[100] = "";
+
+struct tMorseConversion
+{
+    char c;
+    char *translation;
+};
+
+const int timeUd = 300;
+
+const int short_ = 1;
+const int long_ = 3;
+const int silenceBetweenBits = 1;
+const int silenceBetweenLetters = 3;
+const int silenceBetweenWords = 7;
+tMorseConversion MorseTranslation[36] = {
+    {'a', ".-"},
+    {'b', "-..."},
+    {'c', "-.-."},
+    {'d', "-.."},
+    {'e', "."},
+    {'f', ".._."},
+    {'g', "--."},
+    {'h', "...."},
+    {'i', ".."},
+    {'j', ".---"},
+    {'k', "-.-"},
+    {'l', ".-.."},
+    {'m', "--"},
+    {'n', "-."},
+    {'o', "---"},
+    {'p', ".--."},
+    {'q', "--.-"},
+    {'r', ".-."},
+    {'s', "..."},
+    {'t', "-"},
+    {'u', "..-"},
+    {'v', "...-"},
+    {'w', ".--"},
+    {'x', "-..-"},
+    {'y', "-.--"},
+    {'z', "--.."},
+    {'0', "-----"},
+    {'1', ".----"},
+    {'2', "..---"},
+    {'3', "...--"},
+    {'4', "....-"},
+    {'5', "....."},
+    {'6', "-...."},
+    {'7', "--..."},
+    {'8', "---.."},
+    {'9', "----."},
+
+};
+
+void write(char c, char *str, int loops)
+{
+    if (loops == 0)
+    {
+        return;
+    }
+
+    int strLen = strlen(str);
+
+    str[strLen] = c;
+    str[strLen + 1] = '\0';
+
+    Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
+
+    write(c, str, loops - 1);
+}
+
+void MorsePlay(char *text)
+{
+    ttgo->bl->adjust(255);
+    if (*text == '\0')
+    {
+        return;
+    }
+
+    bool abort = false;
+    bool end = false;
+
+    char translation[200] = " ";
+
+    //Serial.printf("translating: %s", text);
+
+    while (*text != '\0')
+    {
+        if (*text == ' ' || *text == '_')
+        {
+            // Serial.println("espacio entre palabras");
+            write(' ', translation, silenceBetweenWords - silenceBetweenLetters + silenceBetweenBits);
+        }
+        else
+        {
+            //Serial.printf("buscando letra %c \n", *text);
+
+            for (int i = 0; i < 36; i++)
+            {
+                if (toLowerChar(*text) == MorseTranslation[i].c)
+                {
+                    //Serial.printf("encontrada letra %c con codigo %s \n", MorseTranslation[i].c, MorseTranslation[1].translation);
+
+                    char *seq = MorseTranslation[i].translation;
+
+                    while (*seq != '\0')
+                    {
+                        if (*seq == '.')
+                        {
+                            //Serial.println("short");
+
+                            write('-', translation, short_);
+                        }
+                        else
+                        {
+                            //Serial.println("largo");
+
+                            write('-', translation, long_);
+                        }
+
+                        //Serial.println("espacio entre letras");
+                        write(' ', translation, silenceBetweenBits);
+
+                        seq++;
+                    }
+                    i = 100; // break;
+                }
+            }
+        }
+        //Serial.println("fin de letra");
+
+        write(' ', translation, silenceBetweenLetters - silenceBetweenBits);
+
+        text++;
+    }
+    Serial.println("fin de traducion");
+
+    int startTime = millis();
+
+    Serial.println(translation);
+
+    while (!abort)
+    {
+
+        int i = (millis() - startTime) / timeUd;
+        bool currentVal = translation[i] == '-';
+
+        ttgo->bl->adjust(currentVal ? 255 : 0);
+        ttgo->tft->fillScreen(currentVal ? TFT_WHITE : TFT_BLACK);
+
+        short int x, y;
+        abort = ttgo->getTouch(x, y) || translation[i] == '\0';
+    }
+
+    ttgo->bl->adjust(permanent.brightness);
+    invalidate = true;
+}
+
+bool blink = false;
+bool deco = false;
+
+const int MaxDecodeOutSize = 15;
+char DecoDisplay[MaxDecodeOutSize] = "";
+char DecoInput[MaxDecodeOutSize] = "";
+
+void MorseTick()
+{
+    if (!drawn)
+    {
+        if (deco)
+        {
+            const tGrid layout = createGrid(FULL_SCREEN_BOX, 10, 10, 3, 4);
+            const tBox DisplayBox = boxMerge(Cell(layout, 0, 0), Cell(layout, 1, 0));
+            const tBox EraseDisplayBox = Cell(layout, 2, 0);
+            const tBox InputBox = boxMerge(Cell(layout, 0, 1), Cell(layout, 1, 1));
+            const tBox BackSpaceInputBox = Cell(layout, 2, 1);
+            const tBox LongBox = Cell(layout, 0, 2);
+            const tBox ShortBox = Cell(layout, 1, 2);
+            const tBox SpaceBox = Cell(layout, 0, 3);
+            const tBox DoneBox = boxMerge(Cell(layout, 1, 3), Cell(layout, 2, 3));
+
+            const tBox Validate = Cell(layout, 2, 2);
+
+            createButton(
+                DisplayBox, onUp, [](int x, int y) {},
+                TFT_WHITE, DecoDisplay, TFT_BLACK);
+            createButton(
+                InputBox, onUp, [](int x, int y) {},
+                TFT_WHITE, DecoInput, TFT_BLACK);
+
+            createButton(
+                EraseDisplayBox, onUp, [](int x, int y)
+                {
+                    *DecoDisplay = '\0';
+                    drawn = false;
+                },
+                RED_CANCEL, "CE", TFT_BLACK);
+            createButton(
+                BackSpaceInputBox, onUp, [](int x, int y)
+                {
+                    DecoInput[max(0, int(strlen(DecoInput) - 1))] = '\0';
+                    drawn = false;
+                },
+                RED_CANCEL, "Back", TFT_BLACK);
+            createButton(
+                LongBox, onUp, [](int x, int y)
+                {
+                    int len = strlen(DecoInput);
+                    if (len < MaxDecodeOutSize)
+                    {
+                        DecoInput[len] = '_';
+                        DecoInput[len + 1] = '\0';
+                        drawn = false;
+                    }
+                },
+                createRGB(40, 40, 240), "L", TFT_BLACK);
+            createButton(
+                ShortBox, onUp, [](int x, int y)
+                {
+                    int len = strlen(DecoInput);
+                    if (len < MaxDecodeOutSize)
+                    {
+                        DecoInput[len] = '.';
+                        DecoInput[len + 1] = '\0';
+                        drawn = false;
+                    }
+                },
+                createRGB(40, 40, 240), "S", TFT_BLACK);
+            createButton(
+                SpaceBox, onUp, [](int x, int y)
+                {
+                    int len = strlen(DecoDisplay);
+                    if (len < MaxDecodeOutSize)
+                    {
+                        DecoDisplay[len] = ' ';
+                        DecoDisplay[len + 1] = '\0';
+                        drawn = false;
+                    }
+                },
+                createRGB(40, 40, 240), "_", TFT_BLACK);
+            createButton(
+                DoneBox, onUp, [](int x, int y)
+                {
+                    drawn = false;
+                    blink = false;
+                },
+                createRGB(40, 40, 240), "Done", TFT_BLACK);
+
+            createButton(
+                Validate, onUp, [](int x, int y)
+                {
+                    for (int i = 0; i < 36; i++)
+                    {
+                        if (0 == strcmp(MorseTranslation[i].translation, DecoInput))
+                        {
+                            int len = strlen(DecoDisplay);
+                            if (len < MaxDecodeOutSize)
+                            {
+                                DecoDisplay[len] = MorseTranslation[i].c;
+                                DecoDisplay[len + 1] = '\0';
+                                drawn = false;
+                            }
+                        }
+                        i = 100;
+                    }
+                    *DecoInput = '\0';
+                },
+                TFT_GREEN, "read", TFT_BLACK);
+        }
+        else if (blink)
+        {
+            createInterationArea(
+                FULL_SCREEN_BOX, onUp, [](int x, int y)
+                {
+                    blink = false;
+                    invalidate = true;
+                    ttgo->bl->adjust(permanent.brightness);
+                });
+        }
+        else
+        {
+            ttgo->tft->fillScreen(0);
+
+            const tGrid layout = createGrid(FULL_SCREEN_BOX, 10, 10, 2, 4);
+            const tBox TextInputBox = boxMerge(Cell(layout, 1, 0), Cell(layout, 0, 0));
+            const tBox SOSBox = Cell(layout, 0, 2);
+            const tBox PlayBox = Cell(layout, 1, 2);
+            const tBox DecoBox = Cell(layout, 0, 3);
+            const tBox BlinkBox = Cell(layout, 1, 3);
+            const tBox BackSpaceBox = Cell(layout, 0, 1);
+            const tBox CEBox = Cell(layout, 1, 1);
+
+            createButton(
+                CEBox, onUp, [](int x, int y)
+                {
+                    text[0] = '\0';
+                    invalidate = true;
+                },
+                RED_CANCEL, "CE", TFT_BLACK);
+
+            createButton(
+                BackSpaceBox, onUp, [](int x, int y)
+                {
+                    text[strlen(text) - 1] = '\0';
+                    invalidate = true;
+                },
+                TFT_ORANGE, "back", TFT_BLACK);
+
+            createButton(
+                TextInputBox, onUp, [](int x, int y)
+                {
+                    OCRstart(text, 99);
+                    drawn = false;
+                },
+                TFT_WHITE, text, TFT_BLACK);
+            createButton(
+                SOSBox, onUp, [](int x, int y)
+                { MorsePlay("SOS SOS SOS SOS"); },
+                createRGB(40, 40, 240), "SOS", TFT_BLACK);
+            createButton(
+                PlayBox, onUp, [](int x, int y)
+                { MorsePlay(text); },
+                createRGB(40, 40, 240), "Play", TFT_BLACK);
+            createButton(
+                BlinkBox, onUp, [](int x, int y)
+                {
+                    blink = true;
+                    drawn = false;
+                },
+                createRGB(40, 40, 240), "blink", TFT_BLACK);
+            createButton(
+                DecoBox, onUp, [](int x, int y)
+                {
+                    deco = true;
+                    drawn = false;
+                },
+                createRGB(40, 40, 240), "Decode", TFT_BLACK);
+        }
+    }
+
+    if (blink)
+    {
+        const int period = 500; // in ms
+        ttgo->bl->adjust(millis() % period > period / 2 ? 0 : 255);
+        ttgo->tft->fillScreen(millis() % period > period / 2 ? TFT_BLACK : TFT_WHITE);
+    }
+}
+
+#endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appOcr.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
@@ -1037,9 +1437,10 @@ tPos nodes[8] = {
     {2, 4},
 };
 
+const int MaxLinks = 15;
 struct tLinkList
 {
-    int list[7];
+    int list[MaxLinks];
     int counter = 0;
 };
 
@@ -1047,13 +1448,16 @@ tLinkList linkList;
 
 int indexCombinations[28][2] = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}, {1, 7}, {2, 3}, {2, 4}, {2, 5}, {2, 6}, {2, 7}, {3, 4}, {3, 5}, {3, 6}, {3, 7}, {4, 5}, {4, 6}, {4, 7}, {5, 6}, {5, 7}, {6, 7}};
 
-const int dictLen = 21;
+const int dictLen = 74;
 
 tuple dict[dictLen] = {
+    {' ', 134217728},
     {'1', 16777728},
     {'2', 135528961},
     {'3', 151257601},
     {'4', 17039876},
+    {'4', 17047680},
+    {'4', 17048192},
     {'5', 151257093},
     {'6', 152305669},
     {'7', 16777729},
@@ -1066,11 +1470,62 @@ tuple dict[dictLen] = {
     {'(', 67141760},
     {')', 33587202},
     {'/', 2048},
+    {'/', 33587328},
+    {'/', 65664},
+    {'/', 33555456},
     {'^', 24576},
     {'*', 4743168},
-    {'x', 105381888},
     {'=', 134479872},
-    {'.', 33554432}};
+    {'.', 33554432},
+    {'a', 18088453},
+    {'b', 202907781},
+    {'b', 152305668},
+    {'c', 135528448},
+    {'c', 134217761},
+    {'d', 152306176},
+    {'e', 134480417},
+    {'f', 1310725},
+    {'g', 84148741},
+    {'g', 155189281},
+    {'g', 152043525},
+    {'h', 18088452},
+    {'h', 18087940},
+    {'i', 16777216},
+    {'i', 1048576},
+    {'j', 152044032},
+    {'j', 83886592},
+    {'k', 68690052},
+    {'l', 135266308},
+    {'m', 17826438},
+    {'m', 22544384},
+    {'n', 84967942},
+    {'n', 85458944},
+    {'o', 152305664},
+    {'p', 1311237},
+    {'q', 84148741},
+    {'r', 68944389},
+    {'r', 1310720},
+    {'s', 184811653},
+    {'s', 201875456},
+    {'t', 32769},
+    {'t', 1048581},
+    {'u', 152043520},
+    {'u', 152044036},
+    {'v', 4719108},
+    {'v', 38797312},
+    {'v', 38797828},
+    {'v', 84410368},
+    {'v', 84410884},
+    {'w', 118489604},
+    {'w', 118489088},
+    {'x', 105381888},
+    {'y', 16794114},
+    {'y', 37765634},
+    {'y', 32898},
+    {'y', 1056900},
+    {'y', 67641476},
+    {'z', 172228608},
+};
 
 const int OCRsize = 50;
 const int OCRLeftOfset = 40; // espacio pa poner bottones
@@ -1167,7 +1622,7 @@ char CallOCR()
                     }
                 }
 
-                if (linkList.counter < 7)
+                if (linkList.counter < MaxLinks)
                 {
                     bool found = false;
                     for (int i = 0; i < linkList.counter; i++)
@@ -1257,6 +1712,37 @@ char CallOCR()
     return '?';
 }
 
+void OCRstart(char *buff, int MaxInputStringSize)
+{
+    bool stop = false;
+    while (!stop)
+    {
+        char next = CallOCR();
+        if (next == '_')
+        {
+            stop = true;
+        }
+        else if (next == '?')
+        {
+            ttgo->motor->onec(10);
+        }
+        else
+        {
+            int CeroIdx = strlen(buff);
+            if (CeroIdx != MaxInputStringSize - 1)
+            {
+                buff[CeroIdx] = next;
+                buff[CeroIdx + 1] = '\0';
+            }
+            else
+            {
+                buff[MaxInputStringSize - 1] = '\0';
+            }
+
+            Serial.println(buff);
+        }
+    }
+}
 #endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
@@ -1288,7 +1774,7 @@ void redrawScores()
     int backOffset = (ScoreA > 9) * 20;
 
     ttgo->tft->fillRect(0, h / 2 - 30, w, h / 2 + 30, TFT_BLACK);
-    drawText(String(buff), w / 2 - 50 - backOffset, h / 2 - 23, 2, 3, TFT_WHITE);
+    drawText(buff, w / 2 - 50 - backOffset, h / 2 - 23, 2, 3, TFT_WHITE);
 }
 
 void TeamScoresTick()
@@ -1381,7 +1867,7 @@ void timerTick(int UsableTime)
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
         for (int i = 0; i < lapList.counter; i++)
         {
-            drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+            drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
         }
 
         tBox boxStartAndStop = {20, 190, w / 2 - 20, 225};
@@ -1475,7 +1961,7 @@ void timerTick(int UsableTime)
 
                     for (int i = 0; i < lapList.counter; i++)
                     {
-                        drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+                        drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
                     }
                 },
                 createRGB(255, 255, 30), "Lap", 0x0000);
@@ -1511,7 +1997,7 @@ void timerTick(int UsableTime)
         //printf("[%d] %d:%d:%d \n", secondsSinceStart, hoursSinceStart, minutesSinceStart, seconds);
         //Serial.printf("%s la hora /n",buff)
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        drawText(String(buff), posX, posY, 4, 2, 0xFFFF);
+        drawText(buff, posX, posY, 4, 2, 0xFFFF);
     }
 }
 
@@ -1636,9 +2122,13 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds, 
         createInterationArea(
             FULL_SCREEN_BOX, onUp, [](int x, int y)
             {
-                if (y - startClickY > 80)
+                if (y - startClickY > h/2)
                 {
                     enterDeepSleep();
+                }
+                if( x - startClickX > w/2){
+                    app = dataMonitor;
+                    invalidate = true;
                 }
             });
 
@@ -1749,7 +2239,7 @@ struct tButton
     tListenerType listenerType;
     tListener function;
     int color;
-    String text;
+    char* text;
     int textColor;
     bool pressed;
     bool draw;
@@ -1834,7 +2324,7 @@ tBox Cell(tGrid grid, int x, int y)
     return ret;
 }
 
-void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, String text, int textColor)
+void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, char* text, int textColor)
 {
     struct tButton wip = {box, listenerType, function, color, text, textColor, false, true};
     //Serial.println("buttonList.counter");
@@ -1842,6 +2332,7 @@ void createButton(struct tBox box, tListenerType listenerType, tListener functio
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
+
 
 void createInterationArea(struct tBox box, tListenerType listenerType, tListener function)
 {
@@ -2038,7 +2529,9 @@ typedef enum
     timer,
     teamScores,
     controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-    unitConversor,
+    baseConversor,
+    morse,
+    calendar,
     turnOff,
 
 } tApp;
@@ -2072,6 +2565,16 @@ const char *monthsToWord[] = {
     "Oct",
     "Nob",
     "Dec"};
+
+const char *WeekDaysToWord[] = {
+    "none",
+    "Lun",
+    "Mar",
+    "Mie",
+    "Jue",
+    "Vie",
+    "Sab",
+    "Dom"};
 
 int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
@@ -2111,6 +2614,15 @@ void destructurateRGB(int col, int &r, int &g, int &b)
     b = b << 3;
     g = g << 2;
     r = r << 3;
+}
+
+char toLowerChar(char c)
+{
+    if (c >= 'A' && c <= 'Z')
+    {
+        return c - 'A' + 'a';
+    }
+    return c;
 }
 
 bool asleep(int h)
@@ -2170,7 +2682,7 @@ void enterDeepSleep()
     esp_deep_sleep_start();
 }
 
-void drawText(String t, int x, int y, int size, int font, int col)
+void drawText(const char *t, int x, int y, int size, int font, int col)
 {
     ttgo->tft->setTextColor(col);
 

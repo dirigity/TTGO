@@ -30,7 +30,7 @@ struct tButton
     tListenerType listenerType;
     tListener function;
     int color;
-    String text;
+    char* text;
     int textColor;
     bool pressed;
     bool draw;
@@ -115,7 +115,7 @@ tBox Cell(tGrid grid, int x, int y)
     return ret;
 }
 
-void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, String text, int textColor)
+void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, char* text, int textColor)
 {
     struct tButton wip = {box, listenerType, function, color, text, textColor, false, true};
     //Serial.println("buttonList.counter");
@@ -123,6 +123,7 @@ void createButton(struct tBox box, tListenerType listenerType, tListener functio
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
+
 
 void createInterationArea(struct tBox box, tListenerType listenerType, tListener function)
 {

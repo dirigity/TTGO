@@ -27,7 +27,7 @@ void redrawScores()
     int backOffset = (ScoreA > 9) * 20;
 
     ttgo->tft->fillRect(0, h / 2 - 30, w, h / 2 + 30, TFT_BLACK);
-    drawText(String(buff), w / 2 - 50 - backOffset, h / 2 - 23, 2, 3, TFT_WHITE);
+    drawText(buff, w / 2 - 50 - backOffset, h / 2 - 23, 2, 3, TFT_WHITE);
 }
 
 void TeamScoresTick()

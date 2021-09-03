@@ -40,7 +40,7 @@
                 "-Wno-error=deprecated-declarations",
                 "-Wno-unused-parameter",
                 "-Wno-sign-compare",
-                "-Wwrite-strings",
+                //"-Wwrite-strings",
                 "-fstack-protector",
                 "-fstrict-volatile-bitfields",
                 "-Wno-error=unused-but-set-variable",

@@ -1,505 +1,658 @@
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-# 2 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
+# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\build\\sketch\\MAIN.ino.cpp"
+# 1 "c:\\Users\\Jaime\\.vscode\\extensions\\vsciot-vscode.vscode-arduino-0.4.4\\out\\src//"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\build\\sketch\\MAIN.ino.cpp"
+# 1 "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.0-rc1\\cores\\esp32/Arduino.h" 1
+/*
+ Arduino.h - Main include file for the Arduino SDK
+ Copyright (c) 2005-2013 Arduino Team.  All right reserved.
 
-// apps
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-# 8 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 9 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 11 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 12 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 13 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
-# 14 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-void setup()
-{
-  Serial.begin(115200);
-  //Serial.setTimeout(50);
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-  // Get Watch object and set up the display
-  ttgo = TTGOClass::getWatch();
-  ttgo->begin();
-  ttgo->motor_begin();
-  // ttgo->lvgl_begin();
-  ttgo->openBL();
 
-  //ttgo->bma->enableAccel();
-  ttgo->bma->enableWakeupInterrupt();
-  //ttgo->bma->enableTiltInterrupt();
-  // variable initialitation
 
-  w = ttgo->tft->width();
-  h = ttgo->tft->height();
 
-  FULL_SCREEN_BOX = {0, 0, w, h};
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdbool.h" 1 3 4
 
-  RED_CANCEL = createRGB(255, 70, 70);
-  GREEN_ALLOW = createRGB(70, 255, 70);
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdbool.h" 3 4
+/* Copyright (C) 1998-2018 Free Software Foundation, Inc.
 
-  // turn on/off
+This file is part of GCC.
 
-  pinMode(35, 0x05); // button
-  attachInterrupt(
-      35, []
-      { interrupt = button; },
-      0x02);
+GCC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3, or (at your option)
+any later version.
 
-  // pinMode(RTC_INT_PIN, INPUT_PULLUP); // timer alarm
-  // attachInterrupt(
-  //     RTC_INT_PIN, []
-  //     {
-  //       interrupt = alarm;
-  //     },
-  //     FALLING);
+GCC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-  // TOUCH SCREEN  Wakeup source
-  //esp_sleep_enable_ext1_wakeup(GPIO_SEL_38, ESP_EXT1_WAKEUP_ALL_LOW);
-  // PEK KEY  Wakeup source
-  esp_sleep_enable_ext1_wakeup(((uint64_t)(((uint64_t)1)<<35)) /*!< Pin 35 selected */, ESP_EXT1_WAKEUP_ALL_LOW);
+Under Section 7 of GPL version 3, you are granted additional
+permissions described in the GCC Runtime Library Exception, version
+3.1, as published by the Free Software Foundation.
 
-  //!Clear IRQ unprocessed  first
+You should have received a copy of the GNU General Public License and
+a copy of the GCC Runtime Library Exception along with this program;
+see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+<http://www.gnu.org/licenses/>.  */
 
-  ttgo->power->enableIRQ(AXP202_PEK_SHORTPRESS_IRQ, true);
-  ttgo->power->clearIRQ();
+/*
+ * ISO C Standard:  7.16  Boolean type and values  <stdbool.h>
+ */
+# 39 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdbool.h" 3 4
+/* Supporting _Bool in C++ is a GCC extension.  */
+# 51 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdbool.h" 3 4
+/* Signal that all the definitions are present.  */
+# 24 "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.0-rc1\\cores\\esp32/Arduino.h" 2
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdint.h" 1 3 4
+# 9 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdint.h" 3 4
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 1 3 4
+/*
+ * Copyright (c) 2004, 2005 by
+ * Ralf Corsepius, Ulm/Germany. All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * is freely granted, provided that this notice is preserved.
+ */
 
-  interaction();
-  planedButtonCoolDown = getUsableTime() + 5;
-  drawn = false;
 
-  Serial.println("Setup done!!");
+
+
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 1 3 4
+/*
+ *  $Id$
+ */
+
+
+
+
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 1 3 4
+/*
+ *  Written by Joel Sherrill <joel@OARcorp.com>.
+ *
+ *  COPYRIGHT (c) 1989-2014.
+ *
+ *  On-Line Applications Research Corporation (OAR).
+ *
+ *  Permission to use, copy, modify, and distribute this software for any
+ *  purpose without fee is hereby granted, provided that this entire notice
+ *  is included in all copies of any software which is or includes a copy
+ *  or modification of this software.
+ *
+ *  THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ *  WARRANTY.  IN PARTICULAR,  THE AUTHOR MAKES NO REPRESENTATION
+ *  OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY OF THIS
+ *  SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ *
+ *  $Id$
+ */
+
+
+
+
+
+extern "C" {
+
+
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\_newlib_version.h" 1 3 4
+/* _newlib_version.h.  Generated from _newlib_version.hin by configure.  */
+/* Version macros for internal and downstream use. */
+# 29 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 2 3 4
+
+/* Macro to test version of GCC.  Returns 0 for non-GCC or too old GCC. */
+# 39 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
+/* Version with trailing underscores for BSD compatibility. */
+
+
+
+/*
+ * Feature test macros control which symbols are exposed by the system
+ * headers.  Any of these must be defined before including any headers.
+ *
+ * __STRICT_ANSI__ (defined by gcc -ansi, -std=c90, -std=c99, or -std=c11)
+ *	ISO C
+ *
+ * _POSIX_SOURCE (deprecated by _POSIX_C_SOURCE=1)
+ * _POSIX_C_SOURCE >= 1
+ * 	POSIX.1-1990
+ *
+ * _POSIX_C_SOURCE >= 2
+ * 	POSIX.2-1992
+ *
+ * _POSIX_C_SOURCE >= 199309L
+ * 	POSIX.1b-1993 Real-time extensions
+ *
+ * _POSIX_C_SOURCE >= 199506L
+ * 	POSIX.1c-1995 Threads extensions
+ *
+ * _POSIX_C_SOURCE >= 200112L
+ * 	POSIX.1-2001 and C99
+ *
+ * _POSIX_C_SOURCE >= 200809L
+ * 	POSIX.1-2008
+ *
+ * _XOPEN_SOURCE
+ *	POSIX.1-1990 and XPG4
+ *
+ * _XOPEN_SOURCE_EXTENDED
+ *	SUSv1 (POSIX.2-1992 plus XPG4v2)
+ *
+ * _XOPEN_SOURCE >= 500
+ *	SUSv2 (POSIX.1c-1995 plus XSI)
+ *
+ * _XOPEN_SOURCE >= 600
+ *	SUSv3 (POSIX.1-2001 plus XSI) and C99
+ *
+ * _XOPEN_SOURCE >= 700
+ *	SUSv4 (POSIX.1-2008 plus XSI)
+ *
+ * _ISOC99_SOURCE or gcc -std=c99 or g++
+ * 	ISO C99
+ *
+ * _ISOC11_SOURCE or gcc -std=c11 or g++ -std=c++11
+ * 	ISO C11
+ *
+ * _ATFILE_SOURCE (implied by _POSIX_C_SOURCE >= 200809L)
+ *	"at" functions
+ *
+ * _LARGEFILE_SOURCE (deprecated by _XOPEN_SOURCE >= 500)
+ *	fseeko, ftello
+ *
+ * _GNU_SOURCE
+ * 	All of the above plus GNU extensions
+ *
+ * _BSD_SOURCE (deprecated by _DEFAULT_SOURCE)
+ * _SVID_SOURCE (deprecated by _DEFAULT_SOURCE)
+ * _DEFAULT_SOURCE (or none of the above)
+ * 	POSIX-1.2008 with BSD and SVr4 extensions
+ *
+ * _FORTIFY_SOURCE = 1 or 2
+ * 	Object Size Checking function wrappers
+ */
+# 162 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
+/*
+ * The following private macros are used throughout the headers to control
+ * which symbols should be exposed.  They are for internal use only, as
+ * indicated by the leading double underscore, and must never be used outside
+ * of these headers.
+ *
+ * __POSIX_VISIBLE
+ * 	any version of POSIX.1; enabled by default, or with _POSIX_SOURCE,
+ * 	any value of _POSIX_C_SOURCE, or _XOPEN_SOURCE >= 500.
+ *
+ * __POSIX_VISIBLE >= 2
+ * 	POSIX.2-1992; enabled by default, with _POSIX_C_SOURCE >= 2,
+ * 	or _XOPEN_SOURCE >= 500.
+ *
+ * __POSIX_VISIBLE >= 199309
+ * 	POSIX.1b-1993; enabled by default, with _POSIX_C_SOURCE >= 199309L,
+ * 	or _XOPEN_SOURCE >= 500.
+ *
+ * __POSIX_VISIBLE >= 199506
+ * 	POSIX.1c-1995; enabled by default, with _POSIX_C_SOURCE >= 199506L,
+ * 	or _XOPEN_SOURCE >= 500.
+ *
+ * __POSIX_VISIBLE >= 200112
+ * 	POSIX.1-2001; enabled by default, with _POSIX_C_SOURCE >= 200112L,
+ * 	or _XOPEN_SOURCE >= 600.
+ *
+ * __POSIX_VISIBLE >= 200809
+ * 	POSIX.1-2008; enabled by default, with _POSIX_C_SOURCE >= 200809L,
+ * 	or _XOPEN_SOURCE >= 700.
+ *
+ * __XSI_VISIBLE
+ *	XPG4 XSI extensions; enabled with any version of _XOPEN_SOURCE.
+ *
+ * __XSI_VISIBLE >= 4
+ *	SUSv1 XSI extensions; enabled with both _XOPEN_SOURCE and
+ * 	_XOPEN_SOURCE_EXTENDED together.
+ *
+ * __XSI_VISIBLE >= 500
+ *	SUSv2 XSI extensions; enabled with _XOPEN_SOURCE >= 500.
+ *
+ * __XSI_VISIBLE >= 600
+ *	SUSv3 XSI extensions; enabled with _XOPEN_SOURCE >= 600.
+ *
+ * __XSI_VISIBLE >= 700
+ *	SUSv4 XSI extensions; enabled with _XOPEN_SOURCE >= 700.
+ *
+ * __ISO_C_VISIBLE >= 1999
+ * 	ISO C99; enabled with gcc -std=c99 or newer (on by default since GCC 5),
+ * 	any version of C++, or with _ISOC99_SOURCE, _POSIX_C_SOURCE >= 200112L,
+ * 	or _XOPEN_SOURCE >= 600.
+ *
+ * __ISO_C_VISIBLE >= 2011
+ * 	ISO C11; enabled with gcc -std=c11 or newer (on by default since GCC 5),
+ * 	g++ -std=c++11 or newer (on by default since GCC 6), or with
+ * 	_ISOC11_SOURCE.
+ *
+ * __ATFILE_VISIBLE
+ *	"at" functions; enabled by default, with _ATFILE_SOURCE,
+ * 	_POSIX_C_SOURCE >= 200809L, or _XOPEN_SOURCE >= 700.
+ *
+ * __LARGEFILE_VISIBLE
+ *	fseeko, ftello; enabled with _LARGEFILE_SOURCE or _XOPEN_SOURCE >= 500.
+ *
+ * __BSD_VISIBLE
+ * 	BSD extensions; enabled by default, or with _BSD_SOURCE.
+ *
+ * __SVID_VISIBLE
+ * 	SVr4 extensions; enabled by default, or with _SVID_SOURCE.
+ *
+ * __MISC_VISIBLE
+ * 	Extensions found in both BSD and SVr4 (shorthand for
+ * 	(__BSD_VISIBLE || __SVID_VISIBLE)), or newlib-specific
+ * 	extensions; enabled by default.
+ *
+ * __GNU_VISIBLE
+ * 	GNU extensions; enabled with _GNU_SOURCE.
+ *
+ * __SSP_FORTIFY_LEVEL
+ * 	Object Size Checking; defined to 0 (off), 1, or 2.
+ *
+ * In all cases above, "enabled by default" means either by defining
+ * _DEFAULT_SOURCE, or by not defining any of the public feature test macros.
+ */
+# 333 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
+/* RTEMS adheres to POSIX -- 1003.1b with some features from annexes.  */
+# 390 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
+/* XMK loosely adheres to POSIX -- 1003.1 */
+# 534 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
+/* ESP-specific.
+ * TODO: introduce 'esp-idf' sys subdirectory, provide custom features.h there.
+ */
+# 549 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 3 4
 }
+# 9 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 2 3 4
 
-// to rember after release (used at onfingerUp call)
-int lastTouchX = -1;
-int lastTouchY = -1;
+/*
+ * Guess on types by examining *_MIN / *_MAX defines.
+ */
 
-bool fingerDown = false;
+/* GCC >= 3.3.0 has __<val>__ implicitly defined. */
 
-void onfingerDown(int x, int y)
-{
-  //Serial.printf("finger down x: %d y:%d \n", x, y);
-  startClickX = x;
-  startClickY = y;
 
-  for (int i = 0; i < buttonList.counter; i++)
-  {
-    if (insideBox(x, y, buttonList.buttons[i].box))
-    {
-      if (buttonList.buttons[i].listenerType == onDown)
-        buttonList.buttons[i].function(x, y);
 
-      buttonList.buttons[i].pressed = false;
-      drawButtons();
-    }
-  }
+
+
+
+
+/* Check if "long long" is 64bit wide */
+/* Modern GCCs provide __LONG_LONG_MAX__, SUSv3 wants LLONG_MAX */
+
+
+
+
+
+/* Check if "long" is 64bit or 32bit wide */
+
+
+
+
+
+
+
+extern "C" {
+
+
+
+typedef signed char __int8_t;
+
+typedef unsigned char __uint8_t;
+# 55 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef short int __int16_t;
+
+typedef short unsigned int __uint16_t;
+# 77 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef int __int32_t;
+
+typedef unsigned int __uint32_t;
+# 103 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef long long int __int64_t;
+
+typedef long long unsigned int __uint64_t;
+# 134 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef signed char __int_least8_t;
+
+typedef unsigned char __uint_least8_t;
+# 160 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef short int __int_least16_t;
+
+typedef short unsigned int __uint_least16_t;
+# 182 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef int __int_least32_t;
+
+typedef unsigned int __uint_least32_t;
+# 200 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef long long int __int_least64_t;
+
+typedef long long unsigned int __uint_least64_t;
+# 214 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
+typedef long long int __intmax_t;
+
+
+
+
+
+
+
+typedef long long unsigned int __uintmax_t;
+
+
+
+
+
+
+
+typedef int __intptr_t;
+
+typedef unsigned int __uintptr_t;
+# 247 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 3 4
 }
+# 13 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 2 3 4
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_intsup.h" 1 3 4
+/*
+ * Copyright (c) 2004, 2005 by
+ * Ralf Corsepius, Ulm/Germany. All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * is freely granted, provided that this notice is preserved.
+ */
 
-void onfingerDrag(int x, int y)
-{
-  bool InsideAButton = false;
 
-  for (int i = 0; i < buttonList.counter; i++)
-  {
-    if (insideBox(x, y, buttonList.buttons[i].box))
-    {
-      if (buttonList.buttons[i].listenerType == onDrag)
-      {
-        buttonList.buttons[i].function(x, y);
-      }
 
-      if (!buttonList.buttons[i].pressed && buttonList.buttons[i].draw)
-      {
-        InsideAButton = true;
-        buttonList.buttons[i].pressed = true;
-        drawButtons();
-      }
-      //Serial.println("se conoce que estamos pulsando un botton o algo");
-    }
-    else
-    {
-      if (buttonList.buttons[i].pressed && buttonList.buttons[i].draw)
-      {
-        InsideAButton = true;
-        buttonList.buttons[i].pressed = false;
-        drawButtons();
-      }
-    }
-  }
+
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\features.h" 1 3 4
+/*
+ *  Written by Joel Sherrill <joel@OARcorp.com>.
+ *
+ *  COPYRIGHT (c) 1989-2014.
+ *
+ *  On-Line Applications Research Corporation (OAR).
+ *
+ *  Permission to use, copy, modify, and distribute this software for any
+ *  purpose without fee is hereby granted, provided that this entire notice
+ *  is included in all copies of any software which is or includes a copy
+ *  or modification of this software.
+ *
+ *  THIS SOFTWARE IS BEING PROVIDED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+ *  WARRANTY.  IN PARTICULAR,  THE AUTHOR MAKES NO REPRESENTATION
+ *  OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY OF THIS
+ *  SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
+ *
+ *  $Id$
+ */
+# 13 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_intsup.h" 2 3 4
+
+
+/* gcc > 3.2 implicitly defines the values we are interested */
+
+
+
+
+
+
+/* Determine how intptr_t and intN_t fastN_t and leastN_t are defined by gcc
+   for this target.  This is used to determine the correct printf() constant in
+   inttypes.h and other  constants in stdint.h.
+   So we end up with
+   ?(signed|unsigned) char == 0
+   ?(signed|unsigned) short == 1
+   ?(signed|unsigned) int == 2
+   ?(signed|unsigned) short int == 3
+   ?(signed|unsigned) long == 4
+   ?(signed|unsigned) long int == 6
+   ?(signed|unsigned) long long == 8
+   ?(signed|unsigned) long long int == 10
+ */
+       
+       
+       
+       
+       
+       
+       
+       
+# 76 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_intsup.h" 3 4
+/* Nothing to define because int32_t is safe to print as an int. */
+# 190 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_intsup.h" 3 4
+       
+       
+       
+       
+       
+       
+       
+       
+# 14 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 2 3 4
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_stdint.h" 1 3 4
+/*
+ * Copyright (c) 2004, 2005 by
+ * Ralf Corsepius, Ulm/Germany. All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * is freely granted, provided that this notice is preserved.
+ */
+
+
+
+
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\machine\\_default_types.h" 1 3 4
+/*
+ *  $Id$
+ */
+# 13 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\sys\\_stdint.h" 2 3 4
+
+
+extern "C" {
+
+
+
+
+typedef __int8_t int8_t ;
+
+
+
+typedef __uint8_t uint8_t ;
+
+
+
+
+
+
+
+typedef __int16_t int16_t ;
+
+
+
+typedef __uint16_t uint16_t ;
+
+
+
+
+
+
+
+typedef __int32_t int32_t ;
+
+
+
+typedef __uint32_t uint32_t ;
+
+
+
+
+
+
+
+typedef __int64_t int64_t ;
+
+
+
+typedef __uint64_t uint64_t ;
+
+
+
+
+
+
+typedef __intmax_t intmax_t;
+
+
+
+
+typedef __uintmax_t uintmax_t;
+
+
+
+
+typedef __intptr_t intptr_t;
+
+
+
+
+typedef __uintptr_t uintptr_t;
+
+
+
+
 }
+# 15 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 2 3 4
 
-void onfingerUp(int x, int y)
-{
-  //Logger logger("onFingerUp");
 
-  //logger("finger up x: %d y:%d \n", x, y);
-  //logger("vertical distance entre touches: %d \n ", y - startClickY);
+extern "C" {
 
-  bool InsideAButton = false;
 
-  for (int i = 0; i < buttonList.counter; i++)
-  {
-    if (insideBox(x, y, buttonList.buttons[i].box))
-    {
-      if (buttonList.buttons[i].listenerType == onUp)
-        buttonList.buttons[i].function(x, y);
 
-      buttonList.buttons[i].pressed = false;
-      drawButtons();
-      InsideAButton = true;
-    }
-  }
+typedef __int_least8_t int_least8_t;
+typedef __uint_least8_t uint_least8_t;
+
+
+
+
+typedef __int_least16_t int_least16_t;
+typedef __uint_least16_t uint_least16_t;
+
+
+
+
+typedef __int_least32_t int_least32_t;
+typedef __uint_least32_t uint_least32_t;
+
+
+
+
+typedef __int_least64_t int_least64_t;
+typedef __uint_least64_t uint_least64_t;
+
+
+
+/*
+ * Fastest minimum-width integer types
+ *
+ * Assume int to be the fastest type for all types with a width 
+ * less than __INT_MAX__ rsp. INT_MAX
+ */
+
+  typedef int int_fast8_t;
+  typedef unsigned int uint_fast8_t;
+# 61 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+  typedef int int_fast16_t;
+  typedef unsigned int uint_fast16_t;
+# 71 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+  typedef int int_fast32_t;
+  typedef unsigned int uint_fast32_t;
+# 81 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+  typedef long long int int_fast64_t;
+  typedef long long unsigned int uint_fast64_t;
+
+
+
+
+
+
+
+/*
+ * Fall back to [u]int_least<N>_t for [u]int_fast<N>_t types
+ * not having been defined, yet.
+ * Leave undefined, if [u]int_least<N>_t should not be available.
+ */
+# 149 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/* Limits of Specified-Width Integer Types */
+# 341 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/* This must match size_t in stddef.h, currently long unsigned int */
+
+
+
+
+
+
+/* This must match sig_atomic_t in <signal.h> (currently int) */
+
+
+
+/* This must match ptrdiff_t  in <stddef.h> (currently long int) */
+
+
+
+
+
+
+
+/* This must match definition in <wchar.h> */
+# 371 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/* This must match definition in <wchar.h> */
+# 382 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/* wint_t is unsigned int on almost all GCC targets.  */
+# 394 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/** Macros for minimum-width integer constant expressions */
+# 447 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
+/** Macros for greatest-width integer constant expression */
+# 463 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\xtensa-esp32-elf\\sys-include\\stdint.h" 3 4
 }
+# 10 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdint.h" 2 3 4
+# 25 "C:\\Users\\Jaime\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.0-rc1\\cores\\esp32/Arduino.h" 2
+# 1 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.4.0\\include\\stdarg.h" 1 3 4
+/* Copyright (C) 1989-2018 Free Software Foundation, Inc.
 
-void ManageTouch()
-{
-  int16_t touchX, touchY;
-  bool touching = ttgo->getTouch(touchX, touchY);
-  if (touching)
-  {
-    lastTouchX = touchX;
-    lastTouchY = touchY;
+This file is part of GCC.
 
-    interaction();
+GCC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3, or (at your option)
+any later version.
 
-    if (!fingerDown)
-    {
-      onfingerDown(touchX, touchY);
-      fingerDown = true;
-    }
+GCC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    onfingerDrag(touchX, touchY);
-  }
-  else
-  {
-    if (fingerDown)
-    {
-      fingerDown = false;
-      onfingerUp(lastTouchX, lastTouchY);
-    }
-  }
-}
+Under Section 7 of GPL version 3, you are granted additional
+permissions described in the GCC Runtime Library Exception, version
+3.1, as published by the Free Software Foundation.
 
-void loop()
-{
-  int year, month, day, hour, minute, seconds, UsableTime = getUsableTime();
-  getTime(year, month, day, hour, minute, seconds);
-  // interrupt manager
-  {
-    switch (interrupt)
-    {
-    case none:
-      break;
-    case button:
-    {
-      Serial.printf("quzas click \n");
+You should have received a copy of the GNU General Public License and
+a copy of the GCC Runtime Library Exception along with this program;
+see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+<http://www.gnu.org/licenses/>.  */
 
-      if (planedButtonCoolDown < UsableTime)
-      {
-        Serial.printf("click  \n");
-
-        interaction();
-        ToggleOnOff();
-      }
-
-      break;
-    }
-    }
-
-    ttgo->power->clearIRQ();
-    interrupt = none;
-  }
-  if (ttgo->bl->isOn())
-  {
-    // touch manager
-    ManageTouch();
-
-    // app managing and ploting
-    if (!drawn)
-    {
-      ttgo->bl->adjust(permanent.brightness);
-      ttgo->tft->fillScreen(0);
-      clearButtons();
-
-      createInterationArea(
-          FULL_SCREEN_BOX, onUp, [](int x, int y)
-          {
-            if (app != launcher)
-            {
-              if (y - startClickY < -80)
-              {
-                goToLauncher();
-              }
-            }
-          });
-    }
-
-    switch (app)
-    {
-
-    case dataMonitor:
-      dataMonitorTick(year, month, day, hour, minute, seconds);
-      break;
-
-    case turnOff:
-      enterDeepSleep();
-
-    case calculator:
-      CalculatorTick();
-      break;
-
-    case countdown:
-      break;
-
-    case timer:
-      timerTick(UsableTime);
-      break;
-
-    case teamScores:
-      TeamScoresTick();
-      break;
-
-    case controlPannel:
-      controlPannelTick();
-      break;
-
-    case unitConversor:
-      break;
-
-    case flashLight:
-
-      if (!drawn)
-      {
-        ttgo->bl->adjust(255);
-        ttgo->tft->fillScreen(0xFFFF);
-        createInterationArea(
-            FULL_SCREEN_BOX, onUp, [](int x, int y)
-            {
-              ttgo->bl->adjust(permanent.brightness);
-              goToLauncher();
-            });
-      }
-      break;
-
-    case launcher:
-      launcherTick();
-      break;
-
-    case watch:
-      watchTick(year, month, day, hour, minute, seconds, UsableTime);
-      break;
-    }
-  }
-
-  // carillón
-  if (permanent.carillon)
-  {
-    if (minute == 59)
-    {
-      interaction();
-    }
-
-    if (seconds == 0 && minute == 0)
-    {
-      int dongs = hour;
-      carillon(dongs);
-    }
-  }
-
-  // pintarBottones
-  if (!drawn)
-  {
-    //Serial.println("via pintar los botones");
-    drawButtons();
-    drawn = true;
-  }
-
-  if (invalidate)
-  {
-    invalidate = false;
-    drawn = false;
-  }
-}
-
-// colors
-//TFT_BLACK(#000000)
-//TFT_NAVY (#000080)
-//TFT_DARKGREEN (#008000)
-//TFT_DARKCYAN (#008080)
-//TFT_MAROON (#80000)
-//TFT_PURPLE #800080)
-//TFT_OLIVE (#808000)
-//TFT_LIGHTGREY (#D3D3D3)
-//TFT_DARKGREY (#808080)
-//TFT_BLUE (#0000FF)
-//TFT_GREEN (#00FF00)
-//TFT_CYAN (#00FFFF)
-//TFT_RED (#FF0000)
-//TFT_MAGENTA (#FF00FF)
-//TFT_YELLOW (#FFFF00)
-//TFT_WHITE (#FFFFFF)
-//TFT_ORANGE (#FFB400)
-//TFT_GREENYELLOW (#B4FF00)
-//TFT_PINK (#FFC0CB)
-//TFT_BROWN (#964B00)
-//TFT_GOLD (#FFD700)
-//TFT_SILVER (#C0C0C0)
-//TFT_SKYBLUE (#87CEEB)
-//TFT_VIOLET (#B42EE2)
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalculator.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalculator.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalculator.ino" 2
-# 5 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalculator.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appControlPannel.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appControlPannel.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appControlPannel.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino" 2
-
-
-
-
-int lastDrawnTime = -1;
-
-void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds)
-{
-
-
-    if (!drawn)
-    {
-        const int buffLenght = 100;
-        char info[buffLenght];
-
-        snprintf(info, buffLenght,
-                 "year: %d  \n"
-                 "month: %s %02d \n"
-                 "day: %02d \n"
-                 "time: %02d:%02d:%02d \n"
-                 "power: %.2fV\n"
-                 "batt: %02d%%\n"
-                 "chargeing: %s\n",
-                 year, monthsToWord[month], month, day, hour, minute, seconds, ttgo->power->getBattVoltage() / 1000., getBatteryCorrectedPorcentage(), ttgo->power->isChargeing() ? "True":"False");
-        drawText(String(info), 0, 0, 2, 2, 0xFFFF /* 255, 255, 255 */);
-
-        lastDrawnTime = seconds;
-    }
-
-    if (lastDrawnTime != seconds)
-    {
-        invalidate = true;
-    }
-}
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appOcr.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appOcr.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appOcr.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino" 2
-
-
-
-
-int ScoreA = 0;
-int ScoreB = 0;
-
-void reset()
-{
-    ScoreA = 0;
-    ScoreB = 0;
-    redrawScores();
-}
-
-const int margin = 25;
-const int size = 50;
-const int resetButtonW = 40;
-
-void redrawScores()
-{
-    char buff[40];
-    sprintf(buff, "%d - %d", ScoreA, ScoreB);
-
-    int backOffset = (ScoreA > 9) * 20;
-
-    ttgo->tft->fillRect(0, h / 2 - 30, w, h / 2 + 30, 0x0000 /*   0,   0,   0 */);
-    drawText(String(buff), w / 2 - 50 - backOffset, h / 2 - 23, 2, 3, 0xFFFF /* 255, 255, 255 */);
-}
-
-void TeamScoresTick()
-{
-
-    tBox APlus = {margin, margin, margin + size, margin + size};
-    tBox AMinus = {margin, h - margin - size, margin + size, h - margin};
-    tBox BPlus = {w - margin - size, margin, w - margin, margin + size};
-    tBox BMinus = {w - margin - size, h - margin - size, w - margin, h - margin};
-
-    if (!drawn)
-    {
-        redrawScores();
-
-        createButton(
-            APlus, onUp, [](int x, int y)
-            {
-                ScoreA++;
-                redrawScores();
-            },
-            GREEN_ALLOW, "+", 0x0000 /*   0,   0,   0 */);
-        createButton(
-            AMinus, onUp, [](int x, int y)
-            {
-                ScoreA--;
-                ScoreA = max(0, ScoreA);
-                redrawScores();
-            },
-            RED_CANCEL, "-", 0xFFFF /* 255, 255, 255 */);
-        createButton(
-            BPlus, onUp, [](int x, int y)
-            {
-                ScoreB++;
-                redrawScores();
-            },
-            GREEN_ALLOW, "+", 0x0000 /*   0,   0,   0 */);
-        createButton(
-            BMinus, onUp, [](int x, int y)
-            {
-                ScoreB--;
-                ScoreB = max(0, ScoreB);
-                redrawScores();
-            },
-            RED_CANCEL, "-", 0xFFFF /* 255, 255, 255 */);
-        tBox resetBox = {w / 2 - resetButtonW, margin, w / 2 + resetButtonW, margin + size};
-
-        createButton(
-            resetBox, onUp, [](int x, int y)
-            {
-                reset();
-            },
-            RED_CANCEL, "Reset", 0xFFFF /* 255, 255, 255 */);
-
-    }
-}
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTimer.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTimer.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTimer.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appWatch.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appWatch.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appWatch.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\buttonSistem.ino"
-
-# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\buttonSistem.ino" 2
-# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\buttonSistem.ino" 2
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\logger.ino"
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\ttgoGlovalDeclarations.ino"
-# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\utils.ino"
+/*
+ * ISO C Standard:  7.15  Variable arguments  <stdarg.h>
+ */
+# 36 "c:\\users\\jaime\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\gcc8_4_0-esp-2021r1\\lib\\gcc\\xtensa-esp32-elf\\8.

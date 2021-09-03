@@ -242,4 +242,5 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\MAIN.ino.cpp.o: \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appControlPannel.ino \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appLauncher.ino \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino

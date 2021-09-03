@@ -117,9 +117,13 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds, 
         createInterationArea(
             FULL_SCREEN_BOX, onUp, [](int x, int y)
             {
-                if (y - startClickY > 80)
+                if (y - startClickY > h/2)
                 {
                     enterDeepSleep();
+                }
+                if( x - startClickX > w/2){
+                    app = dataMonitor;
+                    invalidate = true;
                 }
             });
 

@@ -32,7 +32,7 @@ void timerTick(int UsableTime)
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
         for (int i = 0; i < lapList.counter; i++)
         {
-            drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+            drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
         }
 
         tBox boxStartAndStop = {20, 190, w / 2 - 20, 225};
@@ -126,7 +126,7 @@ void timerTick(int UsableTime)
 
                     for (int i = 0; i < lapList.counter; i++)
                     {
-                        drawText(String(lapList.laps[i]), 40, 75 + i * 20, 1, 2, 0xFFFF);
+                        drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
                     }
                 },
                 createRGB(255, 255, 30), "Lap", 0x0000);
@@ -162,7 +162,7 @@ void timerTick(int UsableTime)
         //printf("[%d] %d:%d:%d \n", secondsSinceStart, hoursSinceStart, minutesSinceStart, seconds);
         //Serial.printf("%s la hora /n",buff)
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        drawText(String(buff), posX, posY, 4, 2, 0xFFFF);
+        drawText(buff, posX, posY, 4, 2, 0xFFFF);
     }
 }
 

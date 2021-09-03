@@ -8,10 +8,10 @@
 // launcher app
 int selected = -1;
 
-const int appCount = 12;
+const int appCount = 14;
 const int skipedApps = 2;
 
-const String AppToString[appCount] = {
+const char *AppToString[appCount] = {
     "launcher",
     "OCR",
 
@@ -23,7 +23,9 @@ const String AppToString[appCount] = {
     "timer",
     "teamScores",
     "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-    "unitConversor",
+    "baseConversor",
+    "morse",
+    "calendar",
     "turnOff"};
 
 void goToLauncher()

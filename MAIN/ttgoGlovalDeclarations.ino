@@ -45,7 +45,9 @@ typedef enum
     timer,
     teamScores,
     controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
-    unitConversor,
+    baseConversor,
+    morse,
+    calendar,
     turnOff,
 
 } tApp;

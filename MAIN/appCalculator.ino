@@ -337,10 +337,10 @@ void CalculatorTick()
     const tGrid MainGrid = createGrid(FULL_SCREEN_BOX, 10, 10, 2, 4);
 
     const tBox textDisplay = boxMerge(Cell(MainGrid, 0, 0), Cell(MainGrid, 1, 0));
-    const tBox equalsBox = Cell(MainGrid, 0, 2);        //{10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
-    const tBox CEBox = Cell(MainGrid, 1, 1);            //{w / 2 + 5, 70, w - 10, buttonMidleSeparation};
-    const tBox BackSpaceBox = Cell(MainGrid, 0, 1);     //{10, 70, w / 2 - 5, buttonMidleSeparation};
-    const tBox graphingBox = Cell(MainGrid, 1, 2);      //{w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
+    const tBox equalsBox = Cell(MainGrid, 0, 2);    //{10, buttonMidleSeparation + 10, w / 2 - 5, h - 10};
+    const tBox CEBox = Cell(MainGrid, 1, 1);        //{w / 2 + 5, 70, w - 10, buttonMidleSeparation};
+    const tBox BackSpaceBox = Cell(MainGrid, 0, 1); //{10, 70, w / 2 - 5, buttonMidleSeparation};
+    const tBox graphingBox = Cell(MainGrid, 1, 2);  //{w / 2 + 5, buttonMidleSeparation + 10, w - 10, h - 10};
     const tBox exitBox = boxMerge(Cell(MainGrid, 0, 3), Cell(MainGrid, 1, 3));
 
     if (!drawn)
@@ -349,38 +349,11 @@ void CalculatorTick()
         createButton(
             exitBox, onUp, [](int x, int y)
             { goToLauncher(); },
-            RED_CANCEL, "Exit", TFT_WHITE);
+            RED_CANCEL, "Exit", TFT_BLACK);
         createButton(
             textDisplay, onUp, [](int x, int y)
             {
-                bool stop = false;
-                while (!stop)
-                {
-                    char next = CallOCR();
-                    if (next == '_')
-                    {
-                        stop = true;
-                    }
-                    else if (next == '?')
-                    {
-                        ttgo->motor->onec(10);
-                    }
-                    else
-                    {
-                        int CeroIdx = strlen(buff);
-                        if (CeroIdx != MaxInputStringSize - 1)
-                        {
-                            buff[CeroIdx] = next;
-                            buff[CeroIdx + 1] = '\0';
-                        }
-                        else
-                        {
-                            buff[MaxInputStringSize - 1] = '\0';
-                        }
-
-                        Serial.println(buff);
-                    }
-                }
+                OCRstart(buff, MaxInputStringSize);
                 drawn = false;
             },
             TFT_WHITE, buff, TFT_BLACK);
@@ -430,14 +403,14 @@ void CalculatorTick()
     //Serial.printf("calculator tick %d \n", drawn);
 }
 
-double ParseAtom(char *&expr)
-{
-    // Read the number from string
-    char *end_ptr;
-    double res = strtod(expr, &end_ptr);
-    // Advance the pointer and return the result
-    expr = end_ptr;
-    return res;
-}
+// double ParseAtom(char *&expr)
+// {
+//     // Read the number from string
+//     char *end_ptr;
+//     double res = strtod(expr, &end_ptr);
+//     // Advance the pointer and return the result
+//     expr = end_ptr;
+//     return res;
+// }
 
 #endif
