@@ -12,6 +12,7 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 
 void setup()
 {
@@ -192,7 +193,6 @@ void loop()
     case none:
       break;
     case button:
-    {
       Serial.printf("quzas click \n");
 
       if (planedButtonCoolDown < UsableTime)
@@ -205,7 +205,6 @@ void loop()
 
       break;
     }
-    }
 
     ttgo->power->clearIRQ();
     interrupt = none;
@@ -214,6 +213,7 @@ void loop()
   {
     // touch manager
     ManageTouch();
+    //if(firstLoop)Serial.println("firstLoop at 216 of MAIN");
 
     // app managing and ploting
     if (!drawn)
@@ -230,6 +230,7 @@ void loop()
               if (y - startClickY < -80)
               {
                 goToLauncher();
+                drawButtons();
               }
             }
           });
@@ -270,6 +271,9 @@ void loop()
 
     case morse:
       MorseTick();
+      break;
+    case calendar:
+      CalendarioTick();
       break;
 
     case flashLight:
@@ -325,6 +329,8 @@ void loop()
     invalidate = false;
     drawn = false;
   }
+  //if(firstLoop) Serial.println("End of first loop");
+  firstLoop = false;
 }
 
 // colors

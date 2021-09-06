@@ -32,7 +32,41 @@ const char *WeekDaysToWord[] = {
     "Vie",
     "Sab",
     "Dom"};
-
+const char *DayToLable[7] = {"L", "M", "X", "J", "V", "S", "D"};
+const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const char *DayToText[32] = {
+    "cero",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "30",
+    "31"};
 int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
@@ -48,6 +82,11 @@ int createRGB(int r, int g, int b)
 {
     return ttgo->tft->color565(r, g, b);
     //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
+}
+
+int rgb(int r, int g, int b)
+{
+    return createRGB(r << 3, g << 3, b << 3);
 }
 
 int RED_CANCEL;
@@ -69,7 +108,8 @@ void destructurateRGB(int col, int &r, int &g, int &b)
     r = col & 0x1F;
 
     b = b << 3;
-    g = g << 2;
+    g = g >> 1;
+    g = g << 3;
     r = r << 3;
 }
 

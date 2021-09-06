@@ -30,10 +30,13 @@ struct tButton
     tListenerType listenerType;
     tListener function;
     int color;
-    char* text;
+    const char *text;
     int textColor;
     bool pressed;
     bool draw;
+    bool clicable;
+    int textSize;
+    int textFont;
 };
 
 struct tGrid
@@ -45,7 +48,7 @@ struct tGrid
     int h;
 };
 
-const int MAX_ONSCREEN_BUTTONS = 10;
+const int MAX_ONSCREEN_BUTTONS = 50;
 struct tButtonList
 {
     tButton buttons[MAX_ONSCREEN_BUTTONS];
@@ -115,19 +118,25 @@ tBox Cell(tGrid grid, int x, int y)
     return ret;
 }
 
-void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, char* text, int textColor)
+void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, const char *text, int textColor)
 {
-    struct tButton wip = {box, listenerType, function, color, text, textColor, false, true};
+    struct tButton wip = {box, listenerType, function, color, text, textColor, false, true, true, 2, 2};
     //Serial.println("buttonList.counter");
     //Serial.println(buttonList.counter);
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
 
-
 void createInterationArea(struct tBox box, tListenerType listenerType, tListener function)
 {
-    struct tButton wip = {box, listenerType, function, 0, "", 0, false, false};
+    struct tButton wip = {box, listenerType, function, 0, "", 0, false, false, true, 2, 2};
+    buttonList.buttons[buttonList.counter] = wip;
+    buttonList.counter++;
+}
+
+void createTextBox(struct tBox box, int color, const char *text, int textColor, int textSize, int textFont)
+{
+    struct tButton wip = {box, onUp, [](int x, int y) {}, color, text, textColor, false, true, false, textSize, textFont};
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
@@ -166,7 +175,7 @@ void drawButtons()
             int borderCol = createRGB(max(0, r - k), max(0, g - k), max(0, blue - k));
             int fillCol = b.color;
 
-            if (b.pressed)
+            if (b.pressed && b.clicable)
             {
                 int kk = borderCol;
                 borderCol = fillCol;
@@ -175,7 +184,7 @@ void drawButtons()
 
             ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, borderCol);
             ttgo->tft->fillRect(b.box.x0 + borderSize, b.box.y0 + borderSize, b.box.x1 - b.box.x0 - borderSize * 2, b.box.y1 - b.box.y0 - borderSize * 2, fillCol);
-            drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, 2, 2, b.textColor);
+            drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, b.textSize, b.textFont, b.textColor);
         }
     }
 }

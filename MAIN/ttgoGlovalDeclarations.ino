@@ -25,6 +25,7 @@ struct tPermanent
 RTC_DATA_ATTR tPermanent permanent;
 
 bool drawn = false;
+bool firstLoop = false;
 bool invalidate = false;
 
 // touch data n stuff

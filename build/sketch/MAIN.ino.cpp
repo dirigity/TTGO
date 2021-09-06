@@ -14,6 +14,7 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 
 void setup()
 {
@@ -194,7 +195,6 @@ void loop()
     case none:
       break;
     case button:
-    {
       Serial.printf("quzas click \n");
 
       if (planedButtonCoolDown < UsableTime)
@@ -207,7 +207,6 @@ void loop()
 
       break;
     }
-    }
 
     ttgo->power->clearIRQ();
     interrupt = none;
@@ -216,6 +215,7 @@ void loop()
   {
     // touch manager
     ManageTouch();
+    //if(firstLoop)Serial.println("firstLoop at 216 of MAIN");
 
     // app managing and ploting
     if (!drawn)
@@ -232,6 +232,7 @@ void loop()
               if (y - startClickY < -80)
               {
                 goToLauncher();
+                drawButtons();
               }
             }
           });
@@ -272,6 +273,9 @@ void loop()
 
     case morse:
       MorseTick();
+      break;
+    case calendar:
+      CalendarioTick();
       break;
 
     case flashLight:
@@ -327,6 +331,8 @@ void loop()
     invalidate = false;
     drawn = false;
   }
+  //if(firstLoop) Serial.println("End of first loop");
+  firstLoop = false;
 }
 
 // colors
@@ -852,6 +858,118 @@ void CalculatorTick()
 // }
 
 #endif
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appCalendario.ino"
+
+#ifndef appCalendario
+#define appCalendario
+
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\buttonSistem.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
+
+int day;
+int month;
+int year;
+
+char title[10];
+
+void CalendarioTick()
+{
+    if (firstLoop)
+    {
+        Serial.println("Starting Calendario and syncing date");
+        {
+            int k, kk, kkk;
+            getTime(year, month, day, k, kk, kkk);
+        }
+    }
+    if (!drawn)
+    {
+        const tGrid mainLayout = createGrid(FULL_SCREEN_BOX, 10, 10, 1, 5);
+        const tBox header = Cell(mainLayout, 0, 0);
+        const tBox body = boxMerge(Cell(mainLayout, 0, 1), Cell(mainLayout, 0, 4));
+        const tGrid bodyLayout = createGrid(body, 0, 0, 7, 7);
+
+        const tGrid headerLayout = createGrid(header, 0, 2, 5, 1);
+        const tBox LastMonthBox = Cell(headerLayout, 0, 0);
+        const tBox NextMonthBox = Cell(headerLayout, 4, 0);
+        const tBox DateDisplayBox = boxMerge(Cell(headerLayout, 1, 0), Cell(headerLayout, 3, 0));
+
+        createButton(
+            LastMonthBox, onUp, [](int x, int y)
+            {
+                month--;
+                if (month == 0)
+                {
+                    month = 12;
+                    year--;
+                }
+                drawn = false;
+            },
+            TFT_WHITE, "<", TFT_BLACK);
+
+        createButton(
+            NextMonthBox, onUp, [](int x, int y)
+            {
+                month++;
+                if (month == 13)
+                {
+                    month = 1;
+                    year++;
+                }
+                drawn = false;
+            },
+            TFT_WHITE, ">", TFT_BLACK);
+
+        sprintf(title, "%s %d", monthsToWord[month], year);
+        createButton(
+            DateDisplayBox, onUp, [](int x, int y)
+            {
+                int k;
+                // open the year selection screen
+            },
+            TFT_WHITE, title, TFT_BLACK);
+
+        for (int i = 0; i < 7; i++)
+        {
+            tBox box = Cell(bodyLayout, i, 0);
+            createTextBox(box, rgb(20, 20, 20), DayToLable[i], TFT_BLACK, 2, 1); // top lables
+        }
+
+        int lastDayFromLastMonth = DaysInMonth[month - 2];
+        int weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, month - 1, year);
+
+        while (weekDay != 6)
+        {
+            createTextBox(Cell(bodyLayout, weekDay, 1), rgb(15, 15, 15), DayToText[lastDayFromLastMonth], TFT_BLACK, 2, 1);
+            lastDayFromLastMonth--;
+            weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, month - 1, year);
+        }
+
+        int week = 1;
+        for (int i = 1; i < DaysInMonth[month - 1] + 1; i++)
+        {
+            int weekDay = ttgo->rtc->getDayOfWeek(i, month, year);
+
+            createTextBox(Cell(bodyLayout, weekDay, week), weekDay > 4 ? rgb(25, 25, 25) : TFT_WHITE, DayToText[i], TFT_BLACK, 2, 1);
+            if (weekDay == 6)
+                week++;
+        }
+        // int i = 1;
+        // while (week < 7)
+        // {
+        //     int weekDay = ttgo->rtc->getDayOfWeek(i, month+1, year);
+
+        //     createTextBox(Cell(bodyLayout, weekDay, week), rgb(15, 15, 15), DayToText[i], TFT_BLACK, 2, 1);
+        //     if (weekDay == 6)
+        //         week++;
+        //     i++;
+        // }
+    }
+}
+
+#endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appControlPannel.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
@@ -1027,6 +1145,7 @@ void launcherTick()
                 app = tApp(selected + skipedApps);
                 selected = -1;
                 drawn = false;
+                firstLoop = true;
                 return;
             });
 
@@ -1118,12 +1237,14 @@ void write(char c, char *str, int loops)
 
     int strLen = strlen(str);
 
-    str[strLen] = c;
-    str[strLen + 1] = '\0';
+    char *start = strLen + str;
 
-    Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
-
-    write(c, str, loops - 1);
+    for (int i = 0; i < loops; i++)
+    {
+        start[i] = c;
+    }
+    start[loops] = '\0';
+    //Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
 }
 
 void MorsePlay(char *text)
@@ -1265,7 +1386,7 @@ void MorseTick()
                     int len = strlen(DecoInput);
                     if (len < MaxDecodeOutSize)
                     {
-                        DecoInput[len] = '_';
+                        DecoInput[len] = '-';
                         DecoInput[len + 1] = '\0';
                         drawn = false;
                     }
@@ -1300,6 +1421,7 @@ void MorseTick()
                 {
                     drawn = false;
                     blink = false;
+                    deco = false;
                 },
                 createRGB(40, 40, 240), "Done", TFT_BLACK);
 
@@ -1308,8 +1430,10 @@ void MorseTick()
                 {
                     for (int i = 0; i < 36; i++)
                     {
+                        //Serial.printf("comparing %s and %s \n", MorseTranslation[i].translation, DecoInput);
                         if (0 == strcmp(MorseTranslation[i].translation, DecoInput))
                         {
+                            //Serial.println("They are equal");
                             int len = strlen(DecoDisplay);
                             if (len < MaxDecodeOutSize)
                             {
@@ -1317,8 +1441,10 @@ void MorseTick()
                                 DecoDisplay[len + 1] = '\0';
                                 drawn = false;
                             }
+                            i = 100;
                         }
-                        i = 100;
+                        //else
+                        //Serial.println("They are different");
                     }
                     *DecoInput = '\0';
                 },
@@ -2239,10 +2365,13 @@ struct tButton
     tListenerType listenerType;
     tListener function;
     int color;
-    char* text;
+    const char *text;
     int textColor;
     bool pressed;
     bool draw;
+    bool clicable;
+    int textSize;
+    int textFont;
 };
 
 struct tGrid
@@ -2254,7 +2383,7 @@ struct tGrid
     int h;
 };
 
-const int MAX_ONSCREEN_BUTTONS = 10;
+const int MAX_ONSCREEN_BUTTONS = 50;
 struct tButtonList
 {
     tButton buttons[MAX_ONSCREEN_BUTTONS];
@@ -2324,19 +2453,25 @@ tBox Cell(tGrid grid, int x, int y)
     return ret;
 }
 
-void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, char* text, int textColor)
+void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, const char *text, int textColor)
 {
-    struct tButton wip = {box, listenerType, function, color, text, textColor, false, true};
+    struct tButton wip = {box, listenerType, function, color, text, textColor, false, true, true, 2, 2};
     //Serial.println("buttonList.counter");
     //Serial.println(buttonList.counter);
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
 
-
 void createInterationArea(struct tBox box, tListenerType listenerType, tListener function)
 {
-    struct tButton wip = {box, listenerType, function, 0, "", 0, false, false};
+    struct tButton wip = {box, listenerType, function, 0, "", 0, false, false, true, 2, 2};
+    buttonList.buttons[buttonList.counter] = wip;
+    buttonList.counter++;
+}
+
+void createTextBox(struct tBox box, int color, const char *text, int textColor, int textSize, int textFont)
+{
+    struct tButton wip = {box, onUp, [](int x, int y) {}, color, text, textColor, false, true, false, textSize, textFont};
     buttonList.buttons[buttonList.counter] = wip;
     buttonList.counter++;
 }
@@ -2375,7 +2510,7 @@ void drawButtons()
             int borderCol = createRGB(max(0, r - k), max(0, g - k), max(0, blue - k));
             int fillCol = b.color;
 
-            if (b.pressed)
+            if (b.pressed && b.clicable)
             {
                 int kk = borderCol;
                 borderCol = fillCol;
@@ -2384,7 +2519,7 @@ void drawButtons()
 
             ttgo->tft->fillRect(b.box.x0, b.box.y0, b.box.x1 - b.box.x0, b.box.y1 - b.box.y0, borderCol);
             ttgo->tft->fillRect(b.box.x0 + borderSize, b.box.y0 + borderSize, b.box.x1 - b.box.x0 - borderSize * 2, b.box.y1 - b.box.y0 - borderSize * 2, fillCol);
-            drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, 2, 2, b.textColor);
+            drawText(b.text, borderSize + 3 + b.box.x0, b.box.y0, b.textSize, b.textFont, b.textColor);
         }
     }
 }
@@ -2509,6 +2644,7 @@ struct tPermanent
 RTC_DATA_ATTR tPermanent permanent;
 
 bool drawn = false;
+bool firstLoop = false;
 bool invalidate = false;
 
 // touch data n stuff
@@ -2575,7 +2711,41 @@ const char *WeekDaysToWord[] = {
     "Vie",
     "Sab",
     "Dom"};
-
+const char *DayToLable[7] = {"L", "M", "X", "J", "V", "S", "D"};
+const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const char *DayToText[32] = {
+    "cero",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+    "30",
+    "31"};
 int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
@@ -2591,6 +2761,11 @@ int createRGB(int r, int g, int b)
 {
     return ttgo->tft->color565(r, g, b);
     //return ((r & 31) << 11) + ((g & 31) << 6) + (b & 31);
+}
+
+int rgb(int r, int g, int b)
+{
+    return createRGB(r << 3, g << 3, b << 3);
 }
 
 int RED_CANCEL;
@@ -2612,7 +2787,8 @@ void destructurateRGB(int col, int &r, int &g, int &b)
     r = col & 0x1F;
 
     b = b << 3;
-    g = g << 2;
+    g = g >> 1;
+    g = g << 3;
     r = r << 3;
 }
 

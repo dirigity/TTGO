@@ -71,12 +71,14 @@ void write(char c, char *str, int loops)
 
     int strLen = strlen(str);
 
-    str[strLen] = c;
-    str[strLen + 1] = '\0';
+    char *start = strLen + str;
 
-    Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
-
-    write(c, str, loops - 1);
+    for (int i = 0; i < loops; i++)
+    {
+        start[i] = c;
+    }
+    start[loops] = '\0';
+    //Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
 }
 
 void MorsePlay(char *text)
@@ -218,7 +220,7 @@ void MorseTick()
                     int len = strlen(DecoInput);
                     if (len < MaxDecodeOutSize)
                     {
-                        DecoInput[len] = '_';
+                        DecoInput[len] = '-';
                         DecoInput[len + 1] = '\0';
                         drawn = false;
                     }
@@ -253,6 +255,7 @@ void MorseTick()
                 {
                     drawn = false;
                     blink = false;
+                    deco = false;
                 },
                 createRGB(40, 40, 240), "Done", TFT_BLACK);
 
@@ -261,8 +264,10 @@ void MorseTick()
                 {
                     for (int i = 0; i < 36; i++)
                     {
+                        //Serial.printf("comparing %s and %s \n", MorseTranslation[i].translation, DecoInput);
                         if (0 == strcmp(MorseTranslation[i].translation, DecoInput))
                         {
+                            //Serial.println("They are equal");
                             int len = strlen(DecoDisplay);
                             if (len < MaxDecodeOutSize)
                             {
@@ -270,8 +275,10 @@ void MorseTick()
                                 DecoDisplay[len + 1] = '\0';
                                 drawn = false;
                             }
+                            i = 100;
                         }
-                        i = 100;
+                        //else
+                        //Serial.println("They are different");
                     }
                     *DecoInput = '\0';
                 },

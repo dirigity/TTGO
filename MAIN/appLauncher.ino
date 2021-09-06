@@ -60,6 +60,7 @@ void launcherTick()
                 app = tApp(selected + skipedApps);
                 selected = -1;
                 drawn = false;
+                firstLoop = true;
                 return;
             });
 
