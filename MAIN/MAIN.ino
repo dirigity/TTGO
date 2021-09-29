@@ -66,7 +66,7 @@ void setup()
   ttgo->power->clearIRQ();
 
   interaction();
-  planedButtonCoolDown = getUsableTime() + 5;
+  planedButtonCoolDown = millis() + 5;
   drawn = false;
 
   Serial.println("Setup done!!");
@@ -157,6 +157,7 @@ void ManageTouch()
 {
   int16_t touchX, touchY;
   bool touching = ttgo->getTouch(touchX, touchY);
+
   if (touching)
   {
     lastTouchX = touchX;
@@ -184,7 +185,7 @@ void ManageTouch()
 
 void loop()
 {
-  int year, month, day, hour, minute, seconds, UsableTime = getUsableTime();
+  int year, month, day, hour, minute, seconds, UsableTime = millis();
   getTime(year, month, day, hour, minute, seconds);
   // interrupt manager
   {
@@ -200,7 +201,7 @@ void loop()
         Serial.printf("click  \n");
 
         interaction();
-        ToggleOnOff();
+        ButtonIRQAnalize();
       }
 
       break;
@@ -300,15 +301,20 @@ void loop()
       break;
     }
   }
+  else
+  { // pantalla apagada
+
+    int16_t touchX, touchY;
+    bool touching = ttgo->getTouch(touchX, touchY);
+    if (touching)
+    {
+      turnOn();
+    }
+  }
 
   // carillón
   if (permanent.carillon)
   {
-    if (minute == 59)
-    {
-      interaction();
-    }
-
     if (seconds == 0 && minute == 0)
     {
       int dongs = hour;

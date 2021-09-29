@@ -16,6 +16,33 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 
+#line 17 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void setup();
+#line 81 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerDown(int x, int y);
+#line 100 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerDrag(int x, int y);
+#line 133 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerUp(int x, int y);
+#line 156 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void ManageTouch();
+#line 185 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void loop();
+#line 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
+void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds);
+#line 65 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void write(char c, char *str, int loops);
+#line 84 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void MorsePlay(char *text);
+#line 178 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void MorseTick();
+#line 11 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void reset();
+#line 22 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void redrawScores();
+#line 33 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void TeamScoresTick();
+#line 17 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void setup()
 {
   Serial.begin(115200);
@@ -2971,7 +2998,8 @@ void carillon(int h)
     // }
     // base 2
 
-    while (h > 0)
+    bool abort = false;
+    while (h > 0 && !abort)
     {
         if (h % 2 == 1)
         {
@@ -2984,6 +3012,8 @@ void carillon(int h)
             delay(1000);
         }
         h /= 2;
+        int kkx, kky;
+        abort = ttgo->getTouch(kkx, kky);
     }
     interaction();
 }

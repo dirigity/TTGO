@@ -99,16 +99,11 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds, 
 {
     // sleep after some time without activity;
     {
-        if (planedScreenSleepTime < UsableTime)
+        if (planedScreenSleepTime < millis())
         {
-            ttgo->bl->off();
-            setCpuFrequencyMhz(80);
+            softSleep();
         }
 
-        if (planedDeepSleepTime < UsableTime)
-        { // 30s despues de apagar la pantalla entrar en sueño profundo
-            enterDeepSleep();
-        }
     }
 
     // draw corona

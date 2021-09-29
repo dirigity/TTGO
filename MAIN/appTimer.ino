@@ -7,9 +7,8 @@
 
 int startTimerTime = 0;
 int stopedTimerTime = 0;
-int currentlyDrawnSecondsSinceStart = 0;
+int currentlyDrawnMillisSinceStart = 0;
 int TimerRuning = false;
-int LapTimes[5] = {0};
 int lastLapTime = -1;
 
 const int MaxStoredLaps = 5;
@@ -44,15 +43,15 @@ void timerTick(int UsableTime)
                 {
                     if (startTimerTime == 0)
                     {
-                        startTimerTime = getUsableTime();
+                        startTimerTime = millis();
                     }
                     else
                     {
-                        startTimerTime = getUsableTime() - (stopedTimerTime - startTimerTime);
+                        startTimerTime = millis - (stopedTimerTime - startTimerTime);
                     }
                     TimerRuning = true;
                     drawn = false;
-                    currentlyDrawnSecondsSinceStart = -1;
+                    currentlyDrawnMillisSinceStart = -1;
                 },
                 GREEN_ALLOW, "Start", 0x0000);
             createButton(
@@ -63,8 +62,8 @@ void timerTick(int UsableTime)
                     TimerRuning = false;
                     drawn = false;
                     ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-                    drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
-                    currentlyDrawnSecondsSinceStart = -1;
+                    drawText("00:00:00.00", posX, posY, 4, 2, 0xFFFF);
+                    currentlyDrawnMillisSinceStart = -1;
 
                     lastLapTime = -1;
                     lapList.counter = 0;
@@ -77,10 +76,10 @@ void timerTick(int UsableTime)
             createButton(
                 boxStartAndStop, onUp, [](int x, int y)
                 {
-                    stopedTimerTime = getUsableTime();
+                    stopedTimerTime = millis();
                     TimerRuning = false;
                     drawn = false;
-                    currentlyDrawnSecondsSinceStart = -1;
+                    currentlyDrawnMillisSinceStart = -1;
                 },
                 RED_CANCEL, "Stop", 0x0000);
             createButton(
@@ -102,23 +101,25 @@ void timerTick(int UsableTime)
 
                         lapList.counter--;
                     }
-                    int secondsSinceStart = getUsableTime() - startTimerTime;
-                    int hoursSinceStart = secondsSinceStart / 3600;
-                    int minutesSinceStart = (secondsSinceStart % 3600) / 60;
-                    int seconds = secondsSinceStart % 60;
+                    int hoursSinceStart = millisSinceStart / 1000 / 3600;
+                    int minutesSinceStart = (millisSinceStart / 1000 % 3600) / 60;
+                    int seconds = millisSinceStart / 1000 % 60;
+                    int millis = millisSinceStart % 1000;
+
+                    char buff[10];
 
                     int diferenceFromLast = 0;
                     if (lastLapTime != -1)
                     {
-                        diferenceFromLast = getUsableTime() - lastLapTime;
-                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d (+%d) ", hoursSinceStart, minutesSinceStart, seconds, diferenceFromLast);
+                        diferenceFromLast = (millis() - lastLapTime)/1000;
+                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d.%02d (+%d)", hoursSinceStart, minutesSinceStart, seconds, millis, diferenceFromLast);
                     }
                     else
                     {
-                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d ", hoursSinceStart, minutesSinceStart, seconds);
+                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millis);
                     }
 
-                    lastLapTime = getUsableTime();
+                    lastLapTime = millis();
 
                     lapList.counter++;
 
@@ -134,32 +135,33 @@ void timerTick(int UsableTime)
         if (startTimerTime == 0)
         {
             ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-            drawText("00:00:00", posX, posY, 4, 2, 0xFFFF);
+            drawText("00:00:00.00", posX, posY, 4, 2, 0xFFFF);
         }
     }
-    int secondsSinceStart;
+    int millisSinceStart;
     if (TimerRuning)
-        secondsSinceStart = UsableTime - startTimerTime;
+        millisSinceStart = UsableTime - startTimerTime;
     else
-        secondsSinceStart = stopedTimerTime - startTimerTime;
+        millisSinceStart = stopedTimerTime - startTimerTime;
 
-    // Serial.println("secondsSinceStart");
-    // Serial.println(secondsSinceStart);
+    // Serial.println("millisSinceStart");
+    // Serial.println(millisSinceStart);
     // Serial.println("TimerRuning");
     // Serial.println(TimerRuning);
-    // Serial.println("currentlyDrawnSecondsSinceStart");
-    // Serial.println(currentlyDrawnSecondsSinceStart);
+    // Serial.println("currentlyDrawnmillisSinceStart");
+    // Serial.println(currentlyDrawnmillisSinceStart);
 
-    if (secondsSinceStart != currentlyDrawnSecondsSinceStart)
+    if (millisSinceStart != currentlyDrawnMillisSinceStart)
     {
-        currentlyDrawnSecondsSinceStart = secondsSinceStart;
-        int hoursSinceStart = secondsSinceStart / 3600;
-        int minutesSinceStart = (secondsSinceStart % 3600) / 60;
-        int seconds = secondsSinceStart % 60;
+        currentlyDrawnMillisSinceStart = millisSinceStart;
+        int hoursSinceStart = millisSinceStart/1000 / 3600;
+        int minutesSinceStart = (millisSinceStart/1000 % 3600) / 60;
+        int seconds = millisSinceStart/1000 % 60;
+        int millis = millisSinceStart % 1000;
 
         char buff[10];
-        sprintf(buff, "%02d:%02d:%02d", hoursSinceStart, minutesSinceStart, seconds);
-        //printf("[%d] %d:%d:%d \n", secondsSinceStart, hoursSinceStart, minutesSinceStart, seconds);
+        sprintf(buff, "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millis);
+        //printf("[%d] %d:%d:%d \n", millisSinceStart, hoursSinceStart, minutesSinceStart, seconds);
         //Serial.printf("%s la hora /n",buff)
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
         drawText(buff, posX, posY, 4, 2, 0xFFFF);

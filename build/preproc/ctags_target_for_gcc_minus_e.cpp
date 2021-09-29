@@ -185,7 +185,7 @@ void ManageTouch()
 
 void loop()
 {
-  int year, month, day, hour, minute, seconds, UsableTime = getUsableTime();
+  int year, month, day, hour, minute, seconds, UsableTime = millis();
   getTime(year, month, day, hour, minute, seconds);
   // interrupt manager
   {
