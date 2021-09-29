@@ -67,7 +67,6 @@ const char *DayToText[32] = {
     "29",
     "30",
     "31"};
-int planedDeepSleepTime = 0;
 int planedScreenSleepTime = 0;
 int planedButtonCoolDown = 0;
 int w, h;
@@ -139,14 +138,6 @@ void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
     s = ret.second;
 }
 
-int getUsableTime()
-{
-    return millis() / 1000;
-    // int year, month, day, hour, minute, seconds;
-    // getTime(year, month, day, hour, minute, seconds);
-    // return seconds + 60 * (minute + 60 * (hour + 24 * (day + 30 * (month + 12 * (year - 2020)))));
-}
-
 void enterDeepSleep()
 { // manage next automatic wakeup
 
@@ -190,7 +181,18 @@ void drawText(const char *t, int x, int y, int size, int font, int col)
     ttgo->tft->println(t);
 }
 
-void ToggleOnOff()
+void softSleep()
+{
+    ttgo->bl->off();
+    setCpuFrequencyMhz(80);
+}
+
+void turnOn(){
+    ttgo->bl->on();
+    setCpuFrequencyMhz(240);
+}
+
+void ButtonIRQAnalize()
 {
 
     drawn = false;
@@ -200,18 +202,7 @@ void ToggleOnOff()
     if (ttgo->power->isPEKShortPressIRQ())
     { // if short click turn off screen
         ttgo->power->clearIRQ();
-        ttgo->bl->reverse();
-
-        if (ttgo->bl->isOn())
-        {
-            setCpuFrequencyMhz(240);
-            planedButtonCoolDown = getUsableTime() + 5;
-        }
-        else
-        {
-            planedDeepSleepTime = getUsableTime() + 15;
-            setCpuFrequencyMhz(80);
-        }
+        softSleep();
     }
     else
     { // if long click enter deepSleep
@@ -222,9 +213,7 @@ void ToggleOnOff()
 
 void interaction()
 {
-    int time = getUsableTime();
-    planedScreenSleepTime = time + 30;
-    planedDeepSleepTime = time + 45;
+    planedScreenSleepTime = millis() + 30000;
 }
 
 bool operator>(RTC_Date a, RTC_Date b)
@@ -292,7 +281,8 @@ void carillon(int h)
     // }
     // base 2
 
-    while (h > 0)
+    bool abort = false;
+    while (h > 0 && !abort)
     {
         if (h % 2 == 1)
         {
@@ -305,6 +295,8 @@ void carillon(int h)
             delay(1000);
         }
         h /= 2;
+        int kkx, kky;
+        abort = ttgo->getTouch(kkx, kky);
     }
     interaction();
 }
