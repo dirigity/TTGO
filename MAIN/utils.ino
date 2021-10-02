@@ -187,7 +187,8 @@ void softSleep()
     setCpuFrequencyMhz(80);
 }
 
-void turnOn(){
+void turnOn()
+{
     ttgo->bl->on();
     setCpuFrequencyMhz(240);
 }
@@ -295,8 +296,8 @@ void carillon(int h)
             delay(1000);
         }
         h /= 2;
-        int kkx, kky;
-        abort = ttgo->getTouch(kkx, kky);
+        int16_t kk;
+        abort = ttgo->getTouch(kk, kk);
     }
     interaction();
 }

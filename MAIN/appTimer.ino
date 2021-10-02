@@ -20,12 +20,28 @@ struct tLapList
 
 tLapList lapList;
 
-void timerTick(int UsableTime)
+int millisSinceStart;
+
+void getStringTime(char *buff)
 {
-    //Logger logger("timerTick");
+    int hoursSinceStart = millisSinceStart / 1000 / 3600;
+    int minutesSinceStart = (millisSinceStart / 1000 % 3600) / 60;
+    int seconds = millisSinceStart / 1000 % 60;
+    int millisToDisplay = millisSinceStart % 1000;
+
+    sprintf(buff, "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millisToDisplay);
+}
+
+void timerTick()
+{
+
+    if (TimerRuning)
+        millisSinceStart = millis() - startTimerTime;
+    else
+        millisSinceStart = stopedTimerTime - startTimerTime;
+
     const int posX = 20;
     const int posY = 20;
-    //logger("timer loop");
     if (!drawn)
     {
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
@@ -47,7 +63,7 @@ void timerTick(int UsableTime)
                     }
                     else
                     {
-                        startTimerTime = millis - (stopedTimerTime - startTimerTime);
+                        startTimerTime = millis() - (stopedTimerTime - startTimerTime);
                     }
                     TimerRuning = true;
                     drawn = false;
@@ -101,23 +117,16 @@ void timerTick(int UsableTime)
 
                         lapList.counter--;
                     }
-                    int hoursSinceStart = millisSinceStart / 1000 / 3600;
-                    int minutesSinceStart = (millisSinceStart / 1000 % 3600) / 60;
-                    int seconds = millisSinceStart / 1000 % 60;
-                    int millis = millisSinceStart % 1000;
+                    
+                    getStringTime(lapList.laps[lapList.counter])
 
-                    char buff[10];
-
-                    int diferenceFromLast = 0;
+                        int diferenceFromLast = 0;
                     if (lastLapTime != -1)
                     {
-                        diferenceFromLast = (millis() - lastLapTime)/1000;
-                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d.%02d (+%d)", hoursSinceStart, minutesSinceStart, seconds, millis, diferenceFromLast);
+                        diferenceFromLast = (millis() - lastLapTime) / 1000;
+                        sprintf(lapList.laps[lapList.counter], "%s (+%d)", lapList.laps[lapList.counter], diferenceFromLast);
                     }
-                    else
-                    {
-                        sprintf(lapList.laps[lapList.counter], "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millis);
-                    }
+                   
 
                     lastLapTime = millis();
 
@@ -138,11 +147,6 @@ void timerTick(int UsableTime)
             drawText("00:00:00.00", posX, posY, 4, 2, 0xFFFF);
         }
     }
-    int millisSinceStart;
-    if (TimerRuning)
-        millisSinceStart = UsableTime - startTimerTime;
-    else
-        millisSinceStart = stopedTimerTime - startTimerTime;
 
     // Serial.println("millisSinceStart");
     // Serial.println(millisSinceStart);
@@ -153,19 +157,16 @@ void timerTick(int UsableTime)
 
     if (millisSinceStart != currentlyDrawnMillisSinceStart)
     {
-        currentlyDrawnMillisSinceStart = millisSinceStart;
-        int hoursSinceStart = millisSinceStart/1000 / 3600;
-        int minutesSinceStart = (millisSinceStart/1000 % 3600) / 60;
-        int seconds = millisSinceStart/1000 % 60;
-        int millis = millisSinceStart % 1000;
 
-        char buff[10];
-        sprintf(buff, "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millis);
-        //printf("[%d] %d:%d:%d \n", millisSinceStart, hoursSinceStart, minutesSinceStart, seconds);
-        //Serial.printf("%s la hora /n",buff)
+        currentlyDrawnMillisSinceStart = millisSinceStart;
+
+        char buff[20];
+        getStringTime(buff)
+
         ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        drawText(buff, posX, posY, 4, 2, 0xFFFF);
+        drawText(buff, posX, posY, 3, 2, 0xFFFF);
     }
 }
+
 
 #endif

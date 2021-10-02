@@ -245,7 +245,7 @@ void loop()
       break;
 
     case turnOff:
-      enterDeepSleep();
+      softSleep();
 
     case calculator:
       CalculatorTick();
@@ -255,7 +255,7 @@ void loop()
       break;
 
     case timer:
-      timerTick(UsableTime);
+      timerTick();
       break;
 
     case teamScores:

@@ -11,8 +11,8 @@ char text[100] = "";
 
 struct tMorseConversion
 {
-    char c;
-    char *translation;
+    const char c;
+    const char *translation;
 };
 
 const int timeUd = 300;
@@ -81,7 +81,7 @@ void write(char c, char *str, int loops)
     //Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
 }
 
-void MorsePlay(char *text)
+void MorsePlay(const char *text)
 {
     ttgo->bl->adjust(255);
     if (*text == '\0')
@@ -113,7 +113,7 @@ void MorsePlay(char *text)
                 {
                     //Serial.printf("encontrada letra %c con codigo %s \n", MorseTranslation[i].c, MorseTranslation[1].translation);
 
-                    char *seq = MorseTranslation[i].translation;
+                    const char *seq = MorseTranslation[i].translation;
 
                     while (*seq != '\0')
                     {

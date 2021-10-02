@@ -19,7 +19,7 @@ TTGOClass *ttgo;
 struct tPermanent
 {
     int brightness = 255;
-    bool carillon = true;
+    bool carillon = false;
 };
 
 RTC_DATA_ATTR tPermanent permanent;

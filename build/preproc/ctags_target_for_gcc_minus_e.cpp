@@ -67,7 +67,7 @@ void setup()
   ttgo->power->clearIRQ();
 
   interaction();
-  planedButtonCoolDown = getUsableTime() + 5;
+  planedButtonCoolDown = millis() + 5;
   drawn = false;
 
   Serial.println("Setup done!!");
@@ -158,6 +158,7 @@ void ManageTouch()
 {
   int16_t touchX, touchY;
   bool touching = ttgo->getTouch(touchX, touchY);
+
   if (touching)
   {
     lastTouchX = touchX;
@@ -201,7 +202,7 @@ void loop()
         Serial.printf("click  \n");
 
         interaction();
-        ToggleOnOff();
+        ButtonIRQAnalize();
       }
 
       break;
@@ -245,7 +246,7 @@ void loop()
       break;
 
     case turnOff:
-      enterDeepSleep();
+      softSleep();
 
     case calculator:
       CalculatorTick();
@@ -255,7 +256,7 @@ void loop()
       break;
 
     case timer:
-      timerTick(UsableTime);
+      timerTick();
       break;
 
     case teamScores:
@@ -301,15 +302,20 @@ void loop()
       break;
     }
   }
+  else
+  { // pantalla apagada
+
+    int16_t touchX, touchY;
+    bool touching = ttgo->getTouch(touchX, touchY);
+    if (touching)
+    {
+      turnOn();
+    }
+  }
 
   // carillón
   if (permanent.carillon)
   {
-    if (minute == 59)
-    {
-      interaction();
-    }
-
     if (seconds == 0 && minute == 0)
     {
       int dongs = hour;
@@ -434,8 +440,8 @@ char text[100] = "";
 
 struct tMorseConversion
 {
-    char c;
-    char *translation;
+    const char c;
+    const char *translation;
 };
 
 const int timeUd = 300;
@@ -504,7 +510,7 @@ void write(char c, char *str, int loops)
     //Serial.printf("morse construction: \"%s\", current char %c %d times\n", str, c, loops);
 }
 
-void MorsePlay(char *text)
+void MorsePlay(const char *text)
 {
     ttgo->bl->adjust(255);
     if (*text == '\0')
@@ -536,7 +542,7 @@ void MorsePlay(char *text)
                 {
                     //Serial.printf("encontrada letra %c con codigo %s \n", MorseTranslation[i].c, MorseTranslation[1].translation);
 
-                    char *seq = MorseTranslation[i].translation;
+                    const char *seq = MorseTranslation[i].translation;
 
                     while (*seq != '\0')
                     {
