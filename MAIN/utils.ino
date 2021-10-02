@@ -181,16 +181,28 @@ void drawText(const char *t, int x, int y, int size, int font, int col)
     ttgo->tft->println(t);
 }
 
+void interaction()
+{
+    planedScreenSleepTime = millis() + 30000;
+}
+
 void softSleep()
 {
     ttgo->bl->off();
     setCpuFrequencyMhz(80);
+    delay(200);
 }
 
 void turnOn()
 {
-    ttgo->bl->on();
-    setCpuFrequencyMhz(240);
+    if (!ttgo->bl->isOn())
+    {
+        ttgo->bl->on();
+        app = watch;
+        invalidate = true;
+        setCpuFrequencyMhz(240);
+        interaction();
+    }
 }
 
 void ButtonIRQAnalize()
@@ -212,10 +224,7 @@ void ButtonIRQAnalize()
     }
 }
 
-void interaction()
-{
-    planedScreenSleepTime = millis() + 30000;
-}
+
 
 bool operator>(RTC_Date a, RTC_Date b)
 {
@@ -342,9 +351,22 @@ int d(int xa, int ya, int xb, int yb)
     return sqrt(X * X + Y * Y);
 }
 
+double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, double EndRangeDst, double val)
+{
+    return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
+}
+
+const double MAX_VOLTAGE = 4.2;
+const double MIN_VOLTAGE = 3.;
+
 int getBatteryCorrectedPorcentage()
 {
-    return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));
+    double currentV = ttgo->power->getBattVoltage()/1000;
+    int ret = int(map(MIN_VOLTAGE, MAX_VOLTAGE, 0, 100, currentV));
+    Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
+    return ret;
+
+    //return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));
 }
 
 #endif

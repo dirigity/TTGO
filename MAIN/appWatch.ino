@@ -95,7 +95,7 @@ double battDrawingAngle = 0;
 
 double battAngle = 0;
 
-void watchTick(int year, int month, int day, int hour, int minute, int seconds, int UsableTime)
+void watchTick(int year, int month, int day, int hour, int minute, int seconds)
 {
     // sleep after some time without activity;
     {
@@ -114,7 +114,7 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds, 
             {
                 if (y - startClickY > h/2)
                 {
-                    enterDeepSleep();
+                    softSleep();
                 }
                 if( x - startClickX > w/2){
                     app = dataMonitor;

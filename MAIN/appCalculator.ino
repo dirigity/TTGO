@@ -194,10 +194,6 @@ char buff[MaxInputStringSize] = "";
 
 const int plotXres = 100;
 
-double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, double EndRangeDst, double val)
-{
-    return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
-}
 
 double MinX, MinY, MaxX, MaxY;
 

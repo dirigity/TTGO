@@ -214,7 +214,7 @@ void ManageTouch()
 
 void loop()
 {
-  int year, month, day, hour, minute, seconds, UsableTime = millis();
+  int year, month, day, hour, minute, seconds;
   getTime(year, month, day, hour, minute, seconds);
   // interrupt manager
   {
@@ -223,16 +223,7 @@ void loop()
     case none:
       break;
     case button:
-      Serial.printf("quzas click \n");
-
-      if (planedButtonCoolDown < UsableTime)
-      {
-        Serial.printf("click  \n");
-
-        interaction();
-        ButtonIRQAnalize();
-      }
-
+      turnOn();
       break;
     }
 
@@ -243,7 +234,6 @@ void loop()
   {
     // touch manager
     ManageTouch();
-    //if(firstLoop)Serial.println("firstLoop at 216 of MAIN");
 
     // app managing and ploting
     if (!drawn)
@@ -275,6 +265,7 @@ void loop()
 
     case turnOff:
       softSleep();
+      break;
 
     case calculator:
       CalculatorTick();
@@ -326,17 +317,23 @@ void loop()
       break;
 
     case watch:
-      watchTick(year, month, day, hour, minute, seconds, UsableTime);
+      watchTick(year, month, day, hour, minute, seconds);
       break;
     }
   }
   else
   { // pantalla apagada
 
-    int16_t touchX, touchY;
-    bool touching = ttgo->getTouch(touchX, touchY);
+    //delay(100);
+
+    //Serial.println("me despierto?");
+
+    int16_t kk;
+    bool touching = ttgo->getTouch(kk, kk);
     if (touching)
     {
+      //Serial.println("nos despiertamos");
+
       turnOn();
     }
   }
@@ -364,7 +361,7 @@ void loop()
     invalidate = false;
     drawn = false;
   }
-  //if(firstLoop) Serial.println("End of first loop");
+
   firstLoop = false;
 }
 
@@ -671,10 +668,6 @@ char buff[MaxInputStringSize] = "";
 
 const int plotXres = 100;
 
-double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, double EndRangeDst, double val)
-{
-    return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
-}
 
 double MinX, MinY, MaxX, MaxY;
 
@@ -1091,7 +1084,7 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
 
     if (!drawn)
     {
-        const int buffLenght = 100;
+        const int buffLenght = 150;
         char info[buffLenght];
 
         snprintf(info, buffLenght,
@@ -1175,6 +1168,7 @@ void launcherTick()
         createInterationArea(
             FULL_SCREEN_BOX, onUp, [](int x, int y)
             {
+                //Serial.printf("Programa selecionado:%d,%s \n", selected + skipedApps, AppToString[selected + skipedApps]);
                 app = tApp(selected + skipedApps);
                 selected = -1;
                 drawn = false;
@@ -2001,7 +1995,6 @@ void TeamScoresTick()
 
 int startTimerTime = 0;
 int stopedTimerTime = 0;
-int currentlyDrawnMillisSinceStart = 0;
 int TimerRuning = false;
 int lastLapTime = -1;
 
@@ -2014,7 +2007,8 @@ struct tLapList
 
 tLapList lapList;
 
-int millisSinceStart;
+int currentlyDrawnMillisSinceStart = 0;
+int millisSinceStart = -1;
 
 void getStringTime(char *buff)
 {
@@ -2023,7 +2017,33 @@ void getStringTime(char *buff)
     int seconds = millisSinceStart / 1000 % 60;
     int millisToDisplay = millisSinceStart % 1000;
 
-    sprintf(buff, "%02d:%02d:%02d.%02d", hoursSinceStart, minutesSinceStart, seconds, millisToDisplay);
+    if (hoursSinceStart == 0){
+        sprintf(buff, "%02d:%02d.%03d", minutesSinceStart, seconds, millisToDisplay);
+    }else{
+        sprintf(buff, "%02d:%02d:%03d", hoursSinceStart,  minutesSinceStart, seconds);
+    }
+
+
+    //Serial.println(buff);
+}
+
+void mainTextDraw(const char *buff)
+{
+    const int posX = 20;
+    const int posY = 15;
+
+    ttgo->tft->fillRect(0, 0, w, h / 4, 0);
+    drawText(buff, posX, posY, 2,3, 0xFFFF);
+}
+
+void drawLaps()
+{
+    ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
+
+    for (int i = 0; i < lapList.counter; i++)
+    {
+        drawText(lapList.laps[i], 30, 75 + i * 20, 1, 2, 0xFFFF);
+    }
 }
 
 void timerTick()
@@ -2034,15 +2054,17 @@ void timerTick()
     else
         millisSinceStart = stopedTimerTime - startTimerTime;
 
-    const int posX = 20;
-    const int posY = 20;
+    if (millisSinceStart != currentlyDrawnMillisSinceStart || !drawn)
+    {
+        currentlyDrawnMillisSinceStart = millisSinceStart;
+        char buff[20];
+        getStringTime(buff);
+        mainTextDraw(buff);
+    }
+
     if (!drawn)
     {
-        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        for (int i = 0; i < lapList.counter; i++)
-        {
-            drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
-        }
+        drawLaps();
 
         tBox boxStartAndStop = {20, 190, w / 2 - 20, 225};
         tBox boxLapAndReset = {w / 2 + 20, 190, w - 20, 225};
@@ -2071,10 +2093,7 @@ void timerTick()
                     stopedTimerTime = 0;
                     TimerRuning = false;
                     drawn = false;
-                    ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-                    drawText("00:00:00.00", posX, posY, 4, 2, 0xFFFF);
-                    currentlyDrawnMillisSinceStart = -1;
-
+                    millisSinceStart = 0;
                     lastLapTime = -1;
                     lapList.counter = 0;
                     ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
@@ -2111,34 +2130,25 @@ void timerTick()
 
                         lapList.counter--;
                     }
-                    
-                    getStringTime(lapList.laps[lapList.counter])
 
-                        int diferenceFromLast = 0;
+                    getStringTime(lapList.laps[lapList.counter]);
+
                     if (lastLapTime != -1)
                     {
-                        diferenceFromLast = (millis() - lastLapTime) / 1000;
+                        int diferenceFromLast = (millis() - lastLapTime) / 1000;
                         sprintf(lapList.laps[lapList.counter], "%s (+%d)", lapList.laps[lapList.counter], diferenceFromLast);
                     }
-                   
 
                     lastLapTime = millis();
 
                     lapList.counter++;
-
-                    ttgo->tft->fillRect(0, 70, w, 110, 0); // erase laps
-
-                    for (int i = 0; i < lapList.counter; i++)
-                    {
-                        drawText(lapList.laps[i], 40, 75 + i * 20, 1, 2, 0xFFFF);
-                    }
+                    drawLaps();
                 },
                 createRGB(255, 255, 30), "Lap", 0x0000);
         }
         if (startTimerTime == 0)
         {
-            ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-            drawText("00:00:00.00", posX, posY, 4, 2, 0xFFFF);
+            millisSinceStart = 0;
         }
     }
 
@@ -2148,20 +2158,7 @@ void timerTick()
     // Serial.println(TimerRuning);
     // Serial.println("currentlyDrawnmillisSinceStart");
     // Serial.println(currentlyDrawnmillisSinceStart);
-
-    if (millisSinceStart != currentlyDrawnMillisSinceStart)
-    {
-
-        currentlyDrawnMillisSinceStart = millisSinceStart;
-
-        char buff[20];
-        getStringTime(buff)
-
-        ttgo->tft->fillRect(0, 0, w, h / 4, 0);
-        drawText(buff, posX, posY, 3, 2, 0xFFFF);
-    }
 }
-
 
 #endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appWatch.ino"
@@ -2262,7 +2259,7 @@ double battDrawingAngle = 0;
 
 double battAngle = 0;
 
-void watchTick(int year, int month, int day, int hour, int minute, int seconds, int UsableTime)
+void watchTick(int year, int month, int day, int hour, int minute, int seconds)
 {
     // sleep after some time without activity;
     {
@@ -2281,7 +2278,7 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds, 
             {
                 if (y - startClickY > h/2)
                 {
-                    enterDeepSleep();
+                    softSleep();
                 }
                 if( x - startClickX > w/2){
                     app = dataMonitor;
@@ -2891,16 +2888,28 @@ void drawText(const char *t, int x, int y, int size, int font, int col)
     ttgo->tft->println(t);
 }
 
+void interaction()
+{
+    planedScreenSleepTime = millis() + 30000;
+}
+
 void softSleep()
 {
     ttgo->bl->off();
     setCpuFrequencyMhz(80);
+    delay(200);
 }
 
 void turnOn()
 {
-    ttgo->bl->on();
-    setCpuFrequencyMhz(240);
+    if (!ttgo->bl->isOn())
+    {
+        ttgo->bl->on();
+        app = watch;
+        invalidate = true;
+        setCpuFrequencyMhz(240);
+        interaction();
+    }
 }
 
 void ButtonIRQAnalize()
@@ -2922,10 +2931,7 @@ void ButtonIRQAnalize()
     }
 }
 
-void interaction()
-{
-    planedScreenSleepTime = millis() + 30000;
-}
+
 
 bool operator>(RTC_Date a, RTC_Date b)
 {
@@ -3052,9 +3058,22 @@ int d(int xa, int ya, int xb, int yb)
     return sqrt(X * X + Y * Y);
 }
 
+double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, double EndRangeDst, double val)
+{
+    return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
+}
+
+const double MAX_VOLTAGE = 5.;
+const double MIN_VOLTAGE = 3.;
+
 int getBatteryCorrectedPorcentage()
 {
-    return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));
+    double currentV = ttgo->power->getBattVoltage()/1000;
+    int ret = int(map(MIN_VOLTAGE, MAX_VOLTAGE, 0, 100, currentV));
+    Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
+    return ret;
+
+    //return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));
 }
 
 #endif

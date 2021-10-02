@@ -13,7 +13,7 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
 
     if (!drawn)
     {
-        const int buffLenght = 100;
+        const int buffLenght = 150;
         char info[buffLenght];
 
         snprintf(info, buffLenght,

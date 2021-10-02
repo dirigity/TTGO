@@ -185,7 +185,7 @@ void ManageTouch()
 
 void loop()
 {
-  int year, month, day, hour, minute, seconds, UsableTime = millis();
+  int year, month, day, hour, minute, seconds;
   getTime(year, month, day, hour, minute, seconds);
   // interrupt manager
   {
@@ -194,16 +194,7 @@ void loop()
     case none:
       break;
     case button:
-      Serial.printf("quzas click \n");
-
-      if (planedButtonCoolDown < UsableTime)
-      {
-        Serial.printf("click  \n");
-
-        interaction();
-        ButtonIRQAnalize();
-      }
-
+      turnOn();
       break;
     }
 
@@ -214,7 +205,6 @@ void loop()
   {
     // touch manager
     ManageTouch();
-    //if(firstLoop)Serial.println("firstLoop at 216 of MAIN");
 
     // app managing and ploting
     if (!drawn)
@@ -246,6 +236,7 @@ void loop()
 
     case turnOff:
       softSleep();
+      break;
 
     case calculator:
       CalculatorTick();
@@ -297,17 +288,23 @@ void loop()
       break;
 
     case watch:
-      watchTick(year, month, day, hour, minute, seconds, UsableTime);
+      watchTick(year, month, day, hour, minute, seconds);
       break;
     }
   }
   else
   { // pantalla apagada
 
-    int16_t touchX, touchY;
-    bool touching = ttgo->getTouch(touchX, touchY);
+    //delay(100);
+
+    //Serial.println("me despierto?");
+
+    int16_t kk;
+    bool touching = ttgo->getTouch(kk, kk);
     if (touching)
     {
+      //Serial.println("nos despiertamos");
+
       turnOn();
     }
   }
@@ -335,7 +332,7 @@ void loop()
     invalidate = false;
     drawn = false;
   }
-  //if(firstLoop) Serial.println("End of first loop");
+
   firstLoop = false;
 }
 

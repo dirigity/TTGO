@@ -57,6 +57,7 @@ void launcherTick()
         createInterationArea(
             FULL_SCREEN_BOX, onUp, [](int x, int y)
             {
+                //Serial.printf("Programa selecionado:%d,%s \n", selected + skipedApps, AppToString[selected + skipedApps]);
                 app = tApp(selected + skipedApps);
                 selected = -1;
                 drawn = false;
