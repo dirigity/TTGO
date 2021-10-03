@@ -356,14 +356,14 @@ double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, doubl
     return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
 }
 
-const double MAX_VOLTAGE = 4.2;
+const double MAX_VOLTAGE = 4.1877;
 const double MIN_VOLTAGE = 3.;
 
 int getBatteryCorrectedPorcentage()
 {
     double currentV = ttgo->power->getBattVoltage()/1000;
     int ret = int(map(MIN_VOLTAGE, MAX_VOLTAGE, 0, 100, currentV));
-    Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
+    //Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
     return ret;
 
     //return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));

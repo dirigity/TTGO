@@ -48,7 +48,7 @@ struct tGrid
     int h;
 };
 
-const int MAX_ONSCREEN_BUTTONS = 50;
+const int MAX_ONSCREEN_BUTTONS = 100;
 struct tButtonList
 {
     tButton buttons[MAX_ONSCREEN_BUTTONS];

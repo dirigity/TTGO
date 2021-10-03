@@ -16,33 +16,6 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 
-#line 17 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void setup();
-#line 81 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerDown(int x, int y);
-#line 100 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerDrag(int x, int y);
-#line 133 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void onfingerUp(int x, int y);
-#line 156 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void ManageTouch();
-#line 186 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
-void loop();
-#line 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
-void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds);
-#line 65 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
-void write(char c, char *str, int loops);
-#line 84 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
-void MorsePlay(const char *text);
-#line 178 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
-void MorseTick();
-#line 11 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void reset();
-#line 22 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void redrawScores();
-#line 33 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
-void TeamScoresTick();
-#line 17 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void setup()
 {
   Serial.begin(115200);
@@ -898,6 +871,9 @@ int day;
 int month;
 int year;
 
+int currentMonth;
+int currentYear;
+
 char title[10];
 
 void CalendarioTick()
@@ -908,6 +884,7 @@ void CalendarioTick()
         {
             int k, kk, kkk;
             getTime(year, month, day, k, kk, kkk);
+            getTime(currentYear, currentMonth, day, k, kk, kkk);
         }
     }
     if (!drawn)
@@ -916,82 +893,121 @@ void CalendarioTick()
         const tBox header = Cell(mainLayout, 0, 0);
         const tBox body = boxMerge(Cell(mainLayout, 0, 1), Cell(mainLayout, 0, 4));
         const tGrid bodyLayout = createGrid(body, 0, 0, 7, 7);
-
-        const tGrid headerLayout = createGrid(header, 0, 2, 5, 1);
-        const tBox LastMonthBox = Cell(headerLayout, 0, 0);
-        const tBox NextMonthBox = Cell(headerLayout, 4, 0);
-        const tBox DateDisplayBox = boxMerge(Cell(headerLayout, 1, 0), Cell(headerLayout, 3, 0));
-
-        createButton(
-            LastMonthBox, onUp, [](int x, int y)
-            {
-                month--;
-                if (month == 0)
-                {
-                    month = 12;
-                    year--;
-                }
-                drawn = false;
-            },
-            TFT_WHITE, "<", TFT_BLACK);
-
-        createButton(
-            NextMonthBox, onUp, [](int x, int y)
-            {
-                month++;
-                if (month == 13)
-                {
-                    month = 1;
-                    year++;
-                }
-                drawn = false;
-            },
-            TFT_WHITE, ">", TFT_BLACK);
-
-        sprintf(title, "%s %d", monthsToWord[month], year);
-        createButton(
-            DateDisplayBox, onUp, [](int x, int y)
-            {
-                int k;
-                // open the year selection screen
-            },
-            TFT_WHITE, title, TFT_BLACK);
-
-        for (int i = 0; i < 7; i++)
-        {
-            tBox box = Cell(bodyLayout, i, 0);
-            createTextBox(box, rgb(20, 20, 20), DayToLable[i], TFT_BLACK, 2, 1); // top lables
-        }
-
-        int lastDayFromLastMonth = DaysInMonth[month - 2];
-        int weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, month - 1, year);
-
-        while (weekDay != 6)
-        {
-            createTextBox(Cell(bodyLayout, weekDay, 1), rgb(15, 15, 15), DayToText[lastDayFromLastMonth], TFT_BLACK, 2, 1);
-            lastDayFromLastMonth--;
-            weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, month - 1, year);
-        }
-
         int week = 1;
-        for (int i = 1; i < DaysInMonth[month - 1] + 1; i++)
+
         {
-            int weekDay = ttgo->rtc->getDayOfWeek(i, month, year);
+            const tGrid headerLayout = createGrid(header, 0, 2, 5, 1);
+            const tBox LastMonthBox = Cell(headerLayout, 0, 0);
+            const tBox NextMonthBox = Cell(headerLayout, 4, 0);
+            const tBox DateDisplayBox = boxMerge(Cell(headerLayout, 1, 0), Cell(headerLayout, 3, 0));
 
-            createTextBox(Cell(bodyLayout, weekDay, week), weekDay > 4 ? rgb(25, 25, 25) : TFT_WHITE, DayToText[i], TFT_BLACK, 2, 1);
-            if (weekDay == 6)
-                week++;
+            createButton(
+                LastMonthBox, onUp, [](int x, int y)
+                {
+                    month--;
+                    if (month == 0)
+                    {
+                        month = 12;
+                        year--;
+                    }
+                    drawn = false;
+                },
+                TFT_WHITE, " <", TFT_BLACK);
+
+            createButton(
+                NextMonthBox, onUp, [](int x, int y)
+                {
+                    month++;
+                    if (month == 13)
+                    {
+                        month = 1;
+                        year++;
+                    }
+                    drawn = false;
+                },
+                TFT_WHITE, " >", TFT_BLACK);
+
+            sprintf(title, "%s %d", monthsToWord[month], year);
+            createButton(
+                DateDisplayBox, onUp, [](int x, int y)
+                {
+                    int k;
+                    // open the year selection screen
+                },
+                TFT_WHITE, title, TFT_BLACK);
         }
-        // int i = 1;
-        // while (week < 7)
-        // {
-        //     int weekDay = ttgo->rtc->getDayOfWeek(i, month+1, year);
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                tBox box = Cell(bodyLayout, i, 0);
+                createTextBox(box, rgb(20, 20, 20), DayToLable[i], TFT_BLACK, 2, 1); // top lables
+            }
+        }
+        {
+            int lastMonthIndex = (month - 2 >= 0) ? month - 2 : 11;
+            int lastMonth = month - 1 == 0 ? 12 : month - 1;
+            int lastDayFromLastMonth = DaysInMonth[lastMonthIndex];
+            int weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, lastMonth, year - (lastMonthIndex == 11));
 
-        //     createTextBox(Cell(bodyLayout, weekDay, week), rgb(15, 15, 15), DayToText[i], TFT_BLACK, 2, 1);
-        //     if (weekDay == 6)
-        //         week++;
-        //     i++;
-        // }
+            while (weekDay != 6)
+            {
+                createTextBox(Cell(bodyLayout, weekDay, 1), rgb(15, 15, 15), DayToText[lastDayFromLastMonth], TFT_BLACK, 2, 1);
+                lastDayFromLastMonth--;
+                weekDay = ttgo->rtc->getDayOfWeek(lastDayFromLastMonth, lastMonth, year - (lastMonthIndex == 11));
+            }
+        }
+        {
+            for (int i = 1; i < DaysInMonth[month - 1] + 1; i++)
+            {
+                int weekDay = ttgo->rtc->getDayOfWeek(i, month, year);
+
+                int color = weekDay > 4 ? rgb(25, 25, 25) : TFT_WHITE;
+
+                if (i == day && month == currentMonth && year == currentYear)
+                {
+                    color = rgb(25,25,32);
+                }
+                createTextBox(Cell(bodyLayout, weekDay, week), color, DayToText[i], TFT_BLACK, 2, 1);
+
+                if (weekDay == 6)
+                    week++;
+            }
+        }
+
+        {
+
+            Serial.printf("el valor de week es: %d \n", week);
+
+            for (int i = 1; week < 7; i++)
+            {
+                //Serial.println("entre en el loop");
+
+                //Serial.println(i);
+
+                int weekDay;
+
+                if (month == 12)
+                {
+                    weekDay = ttgo->rtc->getDayOfWeek(i, 1, year + 1);
+                }
+                else
+                {
+                    weekDay = ttgo->rtc->getDayOfWeek(i, month + 1, year);
+                }
+
+                //Serial.printf("el dia de la semana es: %d \n", weekDay);
+
+                createTextBox(Cell(bodyLayout, weekDay, week), rgb(15, 15, 15), DayToText[i], TFT_BLACK, 2, 1);
+                if (weekDay == 6)
+                {
+                    //Serial.println("paso a la siguiente semana");
+                    week++;
+                }
+                //Serial.println("termina el bucle 1");
+            }
+
+            Serial.println("done drawing");
+        }
     }
 }
 
@@ -2411,7 +2427,7 @@ struct tGrid
     int h;
 };
 
-const int MAX_ONSCREEN_BUTTONS = 50;
+const int MAX_ONSCREEN_BUTTONS = 100;
 struct tButtonList
 {
     tButton buttons[MAX_ONSCREEN_BUTTONS];
@@ -3063,14 +3079,14 @@ double map(double StartRangeSrc, double EndRangeSrc, double StartRangeDst, doubl
     return StartRangeDst + ((EndRangeDst - StartRangeDst) / (EndRangeSrc - StartRangeSrc)) * (val - StartRangeSrc);
 }
 
-const double MAX_VOLTAGE = 5.;
+const double MAX_VOLTAGE = 4.1877;
 const double MIN_VOLTAGE = 3.;
 
 int getBatteryCorrectedPorcentage()
 {
     double currentV = ttgo->power->getBattVoltage()/1000;
     int ret = int(map(MIN_VOLTAGE, MAX_VOLTAGE, 0, 100, currentV));
-    Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
+    //Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
     return ret;
 
     //return ttgo->power->isChargeing() ? ttgo->power->getBattPercentage() : int(ttgo->power->getBattPercentage() * (100. / 128.));
