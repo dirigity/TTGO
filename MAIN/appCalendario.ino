@@ -101,7 +101,7 @@ void CalendarioTick()
             {
                 int weekDay = ttgo->rtc->getDayOfWeek(i, month, year);
 
-                int color = weekDay > 4 ? rgb(25, 25, 25) : TFT_WHITE;
+                int color = weekDay == 6 || weekDay == 0 ? rgb(25, 25, 25) : TFT_WHITE;
 
                 if (i == day && month == currentMonth && year == currentYear)
                 {

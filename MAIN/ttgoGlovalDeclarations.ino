@@ -7,7 +7,6 @@
 // #define LILYGO_WATCH_2019_NO_TOUCH    // To use T-Watch2019 Not touchscreen , please uncomment this line
 #define LILYGO_WATCH_2020_V1 //To use T-Watch2020, please uncomment this line
 
-
 #define LILYGO_WATCH_HAS_MOTOR
 // #define LILYGO_WATCH_LVGL
 
@@ -20,6 +19,7 @@ struct tPermanent
 {
     int brightness = 255;
     bool carillon = false;
+    bool lightSleepMode = false;
 };
 
 RTC_DATA_ATTR tPermanent permanent;
@@ -42,17 +42,16 @@ typedef enum
     watch,
     flashLight,
     calculator,
-    countdown,
     timer,
     teamScores,
     controlPannel, // brigtness(rtc_mem), carillon(rtc_mem), battery stats
     baseConversor,
     morse,
     calendar,
+    wifiPannel,
     turnOff,
 
 } tApp;
 tApp app = watch;
 
 #endif
-

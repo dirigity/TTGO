@@ -3,11 +3,6 @@
 #ifndef Utils
 #define Utils
 
-// cosas del asleep() para no molestar mientras duermes
-const int SleepingHours = 10;
-const int timeToSleep = 23;
-const int timeToWakeUp = 9;
-
 const char *monthsToWord[] = {
     "none",
     "Jan",
@@ -24,15 +19,15 @@ const char *monthsToWord[] = {
     "Dec"};
 
 const char *WeekDaysToWord[] = {
-    "none",
+    "Dom",
     "Lun",
     "Mar",
     "Mie",
     "Jue",
     "Vie",
     "Sab",
-    "Dom"};
-const char *DayToLable[7] = {"L", "M", "X", "J", "V", "S", "D"};
+};
+const char *DayToLable[7] = {"D", "L", "M", "X", "J", "V", "S"};
 const int DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 const char *DayToText[32] = {
     "cero",
@@ -121,11 +116,6 @@ char toLowerChar(char c)
     return c;
 }
 
-bool asleep(int h)
-{
-    return !(h > timeToWakeUp && h < timeToSleep);
-}
-
 void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
 {
     RTC_Date ret = ttgo->rtc->getDateTime();
@@ -139,7 +129,7 @@ void getTime(int &year, int &month, int &day, int &h, int &m, int &s)
 }
 
 void enterDeepSleep()
-{ // manage next automatic wakeup
+{ // manage next automatic wakeup, it will brick the phone!!!!
 
     Serial.println("starting deep sleep");
 
@@ -148,15 +138,8 @@ void enterDeepSleep()
     if (permanent.carillon)
     {
         int waitTime = 0;
-
-        if (!asleep(hour + 1))
-        { // wake up next hour o'Clock
-            waitTime = ((60 - minute) * 60 - 60);
-        }
-        else
-        { // wake up tomorrow
-            waitTime = ((60 - minute) * 60 + SleepingHours * 3600 - 60);
-        }
+        // wake up next hour oclock
+        waitTime = ((60 - minute) * 60 - 60);
 
         Serial.printf("Saldre del deep sleep %u \n", waitTime);
 
@@ -186,11 +169,21 @@ void interaction()
     planedScreenSleepTime = millis() + 30000;
 }
 
+// void softSleepWasteFull()
+// {
+//     ttgo->bl->off();
+//     setCpuFrequencyMhz(80);
+//     delay(200);
+// }
+
 void softSleep()
 {
+    //permanent.lightSleepMode = true;
+    //esp_sleep_enable_timer_wakeup(0.25 * uS_TO_S_FACTOR);
     ttgo->bl->off();
-    setCpuFrequencyMhz(80);
-    delay(200);
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_38, ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_35, ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_light_sleep_start();
 }
 
 void turnOn()
@@ -223,8 +216,6 @@ void ButtonIRQAnalize()
         enterDeepSleep();
     }
 }
-
-
 
 bool operator>(RTC_Date a, RTC_Date b)
 {
@@ -361,7 +352,7 @@ const double MIN_VOLTAGE = 3.;
 
 int getBatteryCorrectedPorcentage()
 {
-    double currentV = ttgo->power->getBattVoltage()/1000;
+    double currentV = ttgo->power->getBattVoltage() / 1000;
     int ret = int(map(MIN_VOLTAGE, MAX_VOLTAGE, 0, 100, currentV));
     //Serial.printf("voltage:%f, ret:%d \n",currentV,ret);
     return ret;

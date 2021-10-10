@@ -244,4 +244,62 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\MAIN.ino.cpp.o: \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino \
  C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFi.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/IPv6Address.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiType.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiSTA.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiGeneric.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_event/include/esp_event.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_event/include/esp_event_base.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_event/include/esp_event_legacy.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_wifi/include/esp_wifi_types.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_wifi/include/esp_private/esp_wifi_types_private.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_hw_support/include/esp_interface.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_event/include/esp_event_base.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_netif/include/esp_netif.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_netif/include/esp_netif_ip_addr.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_netif/include/esp_netif_types.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_netif/include/esp_netif_defaults.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_eth/include/esp_eth_netif_glue.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_eth/include/esp_eth.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_eth/include/esp_eth_com.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/hal/include/hal/eth_types.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_eth/include/esp_eth_mac.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_eth/include/esp_eth_phy.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/tcpip_adapter/include/tcpip_adapter.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/tcpip_adapter/include/tcpip_adapter_types.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip_addr.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/opt.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/port/esp32/include/lwipopts.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/newlib/platform_include/sys/ioctl.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_system/include/esp_task.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/port/esp32/include/netif/dhcp_state.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/debug.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/arch.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/port/esp32/include/arch/cc.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/port/esp32/include/arch/sys_arch.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/port/esp32/include/arch/vfs_lwip.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/def.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip4_addr.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip6_addr.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/def.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip6_zone.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/include/apps/dhcpserver/dhcpserver.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_netif/include/esp_netif_sta_list.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/esp_wifi/include/esp_smartconfig.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/wifi_provisioning/include/wifi_provisioning/manager.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/protocomm/include/common/protocomm.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/protocomm/include/security/protocomm_security.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/wifi_provisioning/include/wifi_provisioning/wifi_config.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/inet.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiAP.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiScan.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiClient.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/Client.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiServer.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/Server.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiUdp.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/Udp.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/cbuf.h

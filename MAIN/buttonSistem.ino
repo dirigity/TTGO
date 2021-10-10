@@ -47,11 +47,9 @@ struct tGrid
     int w;
     int h;
 };
-
-const int MAX_ONSCREEN_BUTTONS = 100;
 struct tButtonList
 {
-    tButton buttons[MAX_ONSCREEN_BUTTONS];
+    tButton buttons[150];
     int counter = 0;
 };
 
@@ -118,27 +116,28 @@ tBox Cell(tGrid grid, int x, int y)
     return ret;
 }
 
+void addButton(struct tButton wip)
+{
+    buttonList.buttons[buttonList.counter] = wip;
+    buttonList.counter++;
+}
+
 void createButton(struct tBox box, tListenerType listenerType, tListener function, int color, const char *text, int textColor)
 {
     struct tButton wip = {box, listenerType, function, color, text, textColor, false, true, true, 2, 2};
-    //Serial.println("buttonList.counter");
-    //Serial.println(buttonList.counter);
-    buttonList.buttons[buttonList.counter] = wip;
-    buttonList.counter++;
+    addButton(wip);
 }
 
 void createInterationArea(struct tBox box, tListenerType listenerType, tListener function)
 {
     struct tButton wip = {box, listenerType, function, 0, "", 0, false, false, true, 2, 2};
-    buttonList.buttons[buttonList.counter] = wip;
-    buttonList.counter++;
+    addButton(wip);
 }
 
 void createTextBox(struct tBox box, int color, const char *text, int textColor, int textSize, int textFont)
 {
     struct tButton wip = {box, onUp, [](int x, int y) {}, color, text, textColor, false, true, false, textSize, textFont};
-    buttonList.buttons[buttonList.counter] = wip;
-    buttonList.counter++;
+    addButton(wip);
 }
 
 void clearButtons()

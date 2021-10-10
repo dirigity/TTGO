@@ -93,7 +93,6 @@ double minuteDrawingAngle = 0;
 double hourDrawingAngle = 0;
 double battDrawingAngle = 0;
 
-double battAngle = 0;
 
 void watchTick(int year, int month, int day, int hour, int minute, int seconds)
 {
@@ -103,7 +102,6 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds)
         {
             softSleep();
         }
-
     }
 
     // draw corona
@@ -112,11 +110,12 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds)
         createInterationArea(
             FULL_SCREEN_BOX, onUp, [](int x, int y)
             {
-                if (y - startClickY > h/2)
+                if (y - startClickY > h / 2)
                 {
                     softSleep();
                 }
-                if( x - startClickX > w/2){
+                if (x - startClickX > w / 2)
+                {
                     app = dataMonitor;
                     invalidate = true;
                 }
@@ -151,15 +150,9 @@ void watchTick(int year, int month, int day, int hour, int minute, int seconds)
     double secondAngle = double(seconds) / 60. * 2. * PI;
     double minuteAngle = double(minute) / 60. * 2. * PI + secondAngle / 60.;
     double hourAngle = double(hour) / 12. * 2. * PI + minuteAngle / 12.;
-    if (battAngle == 0)
-    {
-        battAngle = (getBatteryCorrectedPorcentage() / 100. * 2. * PI);
-    }
-    else
-    {
-        battAngle = battAngle * 0.95 + (getBatteryCorrectedPorcentage() / 100. * 2. * PI) * 0.05;
-    }
 
+    double battAngle = (getBatteryCorrectedPorcentage() / 100. * 2. * PI);
+    
     // draw gradient circles
     {
         for (int i = 0; i < 200; i++)

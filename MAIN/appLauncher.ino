@@ -19,13 +19,13 @@ const char *AppToString[appCount] = {
     "watch",
     "flashLight",
     "calculator", // demos and scientific
-    "countdown",
     "timer",
     "teamScores",
     "controlPannel", // brigtness(rtc_mem), carillon(rtc_mem), battery stats
     "baseConversor",
     "morse",
     "calendar",
+    "wifiPannel",
     "turnOff"};
 
 void goToLauncher()

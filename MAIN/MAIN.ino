@@ -13,23 +13,33 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino"
 
 void setup()
 {
+
   Serial.begin(115200);
+
+  ttgo = TTGOClass::getWatch();
+  ttgo->begin();
+
+  // if (permanent.lightSleepMode){
+  //   int16_t kk;
+  //   if(ttgo->getTouch(kk, kk)){
+  //     permanent.lightSleepMode = false;
+  //     turnOn();
+  //   }else{
+  //     softSleep();
+  //   }
+  // }
+
   //Serial.setTimeout(50);
 
   // Get Watch object and set up the display
-  ttgo = TTGOClass::getWatch();
-  ttgo->begin();
+
   ttgo->motor_begin();
   // ttgo->lvgl_begin();
   ttgo->openBL();
-
-  //ttgo->bma->enableAccel();
-  ttgo->bma->enableWakeupInterrupt();
-  //ttgo->bma->enableTiltInterrupt();
-  // variable initialitation
 
   w = ttgo->tft->width();
   h = ttgo->tft->height();
@@ -41,11 +51,11 @@ void setup()
 
   // turn on/off
 
-  pinMode(AXP202_INT, INPUT_PULLUP); // button
-  attachInterrupt(
-      AXP202_INT, []
-      { interrupt = button; },
-      FALLING);
+  // pinMode(AXP202_INT, INPUT_PULLUP); // button
+  // attachInterrupt(
+  //     AXP202_INT, []
+  //     { interrupt = button; },
+  //     FALLING);
 
   // pinMode(RTC_INT_PIN, INPUT_PULLUP); // timer alarm
   // attachInterrupt(
@@ -58,12 +68,12 @@ void setup()
   // TOUCH SCREEN  Wakeup source
   //esp_sleep_enable_ext1_wakeup(GPIO_SEL_38, ESP_EXT1_WAKEUP_ALL_LOW);
   // PEK KEY  Wakeup source
-  esp_sleep_enable_ext1_wakeup(GPIO_SEL_35, ESP_EXT1_WAKEUP_ALL_LOW);
+  //esp_sleep_enable_ext1_wakeup(GPIO_SEL_35, ESP_EXT1_WAKEUP_ALL_LOW);
 
   //!Clear IRQ unprocessed  first
 
-  ttgo->power->enableIRQ(AXP202_PEK_SHORTPRESS_IRQ, true);
-  ttgo->power->clearIRQ();
+  //ttgo->power->enableIRQ(AXP202_PEK_SHORTPRESS_IRQ, true);
+  //ttgo->power->clearIRQ();
 
   interaction();
   planedButtonCoolDown = millis() + 5;
@@ -187,31 +197,20 @@ void loop()
 {
   int year, month, day, hour, minute, seconds;
   getTime(year, month, day, hour, minute, seconds);
-  // interrupt manager
-  {
-    switch (interrupt)
-    {
-    case none:
-      break;
-    case button:
-      turnOn();
-      break;
-    }
 
-    ttgo->power->clearIRQ();
-    interrupt = none;
-  }
   if (ttgo->bl->isOn())
   {
     // touch manager
     ManageTouch();
-
     // app managing and ploting
     if (!drawn)
     {
       ttgo->bl->adjust(permanent.brightness);
       ttgo->tft->fillScreen(0);
       clearButtons();
+
+      //Serial.println("loop1");
+      //delay(100);
 
       createInterationArea(
           FULL_SCREEN_BOX, onUp, [](int x, int y)
@@ -240,9 +239,6 @@ void loop()
 
     case calculator:
       CalculatorTick();
-      break;
-
-    case countdown:
       break;
 
     case timer:
@@ -289,6 +285,10 @@ void loop()
 
     case watch:
       watchTick(year, month, day, hour, minute, seconds);
+      break;
+
+    case wifiPannel:
+      wifiPannelTick();
       break;
     }
   }
