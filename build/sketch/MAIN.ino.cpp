@@ -17,6 +17,33 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino"
 
+#line 18 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void setup();
+#line 91 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerDown(int x, int y);
+#line 110 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerDrag(int x, int y);
+#line 143 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void onfingerUp(int x, int y);
+#line 166 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void ManageTouch();
+#line 196 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+void loop();
+#line 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
+void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds);
+#line 65 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void write(char c, char *str, int loops);
+#line 84 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void MorsePlay(const char *text);
+#line 178 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appMorse.ino"
+void MorseTick();
+#line 11 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void reset();
+#line 22 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void redrawScores();
+#line 33 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appTeamScores.ino"
+void TeamScoresTick();
+#line 18 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void setup()
 {
 
@@ -2402,7 +2429,7 @@ const char *password = "1234567890asdf";
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
-const int CONNECTION_TIME_OUT = 40000;
+const int CONNECTION_TIME_OUT = 4000;
 
 void wifiPannelTick()
 {
@@ -2416,7 +2443,7 @@ void wifiPannelTick()
         tBox trelloButton = Cell(layout, 0, 2);
         tBox weatherButton = Cell(layout, 0, 3);
 
-        int enabledIfWifiColor = (WiFi.status() == WL_CONNECTED) ? TFT_DARKCYAN : TFT_LIGHTGREY;
+        int enabledIfWifiColor = (WiFi.status() == WL_CONNECTED) ? TFT_LIGHTGREY : TFT_DARKCYAN;
 
         createButton(
             toggleButton, onUp, [](int x, int y)
@@ -2424,24 +2451,33 @@ void wifiPannelTick()
                 if (WiFi.status() != WL_CONNECTED)
                 {
                     WiFi.begin(ssid, password);
+                    WiFi.setSleep(false);
                     int time = 0;
                     int col = random();
                     ttgo->tft->fillScreen(TFT_BLACK);
+
+                    Serial.println(WiFi.status());
+                    int aviableNetworksN = WiFi.scanNetworks();
+                    Serial.printf("Wifises(%d): \n", aviableNetworksN);
+                    for (int i = 0; i < aviableNetworksN; i++)
+                    {
+                        Serial.println(WiFi.SSID(i));
+                    }
 
                     while (WiFi.status() != WL_CONNECTED && time < CONNECTION_TIME_OUT)
                     {
                         delay(50);
                         time += 50;
-                        //Serial.print(".");
                         //tft->print(".");
 
                         //ttgo->tft->fillScreen(TFT_BLACK);
-                        int r = 10;
+                        int r = 5;
                         int Dx = cos(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         int Dy = sin(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         if (time % 700 == 0)
                         {
-                            col += random();
+                            Serial.print(".");
+                            col += random() / 1000000;
                         }
                         ttgo->tft->fillCircle(TFT_HEIGHT / 2 + Dx, TFT_WIDTH / 2 + Dy, r, col);
                     }
@@ -2453,7 +2489,7 @@ void wifiPannelTick()
                 }
                 else
                 {
-                    WiFi.disconnect();
+                    WiFi.disconnect(true);
                 }
 
                 invalidate = true;
@@ -2465,6 +2501,18 @@ void wifiPannelTick()
             {
                 if (WiFi.status() == WL_CONNECTED)
                 {
+                    bool gotTime = false;
+                    while (!gotTime)
+                    {
+                        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+                        struct tm timeinfo;
+                        gotTime = getLocalTime(&timeinfo);
+                        if (!gotTime)
+                        {
+                            delay(3000);
+                        }
+                    }
+                    ttgo->rtc->syncToRtc();
                 }
             },
             enabledIfWifiColor, "sync time", TFT_BLACK);
