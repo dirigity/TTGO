@@ -1,4 +1,6 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 #ifndef Utils
 #define Utils
@@ -92,6 +94,30 @@ typedef enum
     button
 } tInterrupt;
 tInterrupt interrupt = none;
+
+char *fetch(const char *url, const char *certificate)
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        HTTPClient http;
+        http.begin(url, certificate);
+        int httpCode = http.GET();
+        if (httpCode > 0)
+        {
+            String payload = http.getString();
+            Serial.println(httpCode);
+            Serial.println(payload);
+        }
+
+        else
+        {
+            Serial.println("Error on HTTP request");
+        }
+
+        http.end();
+    }
+    return "";
+}
 
 void destructurateRGB(int col, int &r, int &g, int &b)
 {

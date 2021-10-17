@@ -23,13 +23,8 @@ curl -H "Accept: text/plain" https://icanhazdadjoke.com/ <- lo mas importante
 
 */
 #include <WiFi.h>
+#include "jsmn-master\jsmn.h"
 
-const char *ssid = "Unknown";
-const char *password = "1234567890asdf";
-
-const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 3600;
-const int daylightOffset_sec = 3600;
 const int CONNECTION_TIME_OUT = 4000;
 
 void wifiPannelTick()
@@ -51,19 +46,14 @@ void wifiPannelTick()
             {
                 if (WiFi.status() != WL_CONNECTED)
                 {
+                    const char *ssid = "Unknown";
+                    const char *password = "1234567890asdf";
+
                     WiFi.begin(ssid, password);
                     WiFi.setSleep(false);
                     int time = 0;
                     int col = random();
                     ttgo->tft->fillScreen(TFT_BLACK);
-
-                    Serial.println(WiFi.status());
-                    int aviableNetworksN = WiFi.scanNetworks();
-                    Serial.printf("Wifises(%d): \n", aviableNetworksN);
-                    for (int i = 0; i < aviableNetworksN; i++)
-                    {
-                        Serial.println(WiFi.SSID(i));
-                    }
 
                     while (WiFi.status() != WL_CONNECTED && time < CONNECTION_TIME_OUT)
                     {
@@ -77,7 +67,7 @@ void wifiPannelTick()
                         int Dy = sin(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         if (time % 700 == 0)
                         {
-                            Serial.print(".");
+                            Serial.println(".");
                             col += random() / 1000000;
                         }
                         ttgo->tft->fillCircle(TFT_HEIGHT / 2 + Dx, TFT_WIDTH / 2 + Dy, r, col);
@@ -102,6 +92,9 @@ void wifiPannelTick()
             {
                 if (WiFi.status() == WL_CONNECTED)
                 {
+                    const char *ntpServer = "pool.ntp.org";
+                    const long gmtOffset_sec = 3600;
+                    const int daylightOffset_sec = 3600;
                     bool gotTime = false;
                     while (!gotTime)
                     {
@@ -121,8 +114,48 @@ void wifiPannelTick()
         createButton(
             trelloButton, onUp, [](int x, int y)
             {
+                Serial.println("trello fetching");
+
                 if (WiFi.status() == WL_CONNECTED)
                 {
+                    const char *apiUrl = "https://trello.com/b/OA8Jy4rW.json";
+                    const char *certificate =
+                        "-----BEGIN CERTIFICATE-----\n"
+                        "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\n"
+                        "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
+                        "d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD\n"
+                        "QTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT\n"
+                        "MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\n"
+                        "b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG\n"
+                        "9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB\n"
+                        "CSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97\n"
+                        "nh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt\n"
+                        "43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P\n"
+                        "T19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4\n"
+                        "gdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO\n"
+                        "BgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR\n"
+                        "TLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw\n"
+                        "DQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr\n"
+                        "hMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg\n"
+                        "06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF\n"
+                        "PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls\n"
+                        "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\n"
+                        "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n"
+                        "-----END CERTIFICATE-----";
+                    char *recived = fetch(apiUrl, certificate);
+
+                    { // parse scope
+
+                        jsmn_parser p;
+                        jsmn_init(&p);
+
+                        const int c = 100;
+                        jsmntok_t t[TOK_N]; /* We expect no more than TOK_N JSON tokens */
+
+                        int r = jsmn_parse(&p, recived, strlen(recived), t, TOK_N);
+
+                        serial.printf("encontre %d tokens", r);
+                    }
                 }
             },
             enabledIfWifiColor, "sync trello", TFT_BLACK);

@@ -3,7 +3,6 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
 
 // apps
-
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWatch.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appTimer.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appControlPannel.ino"
@@ -80,6 +79,7 @@ void setup()
   drawn = false;
 
   Serial.println("Setup done!!");
+
 }
 
 // to rember after release (used at onfingerUp call)
