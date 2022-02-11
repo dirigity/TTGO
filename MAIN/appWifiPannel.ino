@@ -25,7 +25,7 @@ curl -H "Accept: text/plain" https://icanhazdadjoke.com/ <- lo mas importante
 #include <WiFi.h>
 #include "jsmn-master\jsmn.h"
 
-const int CONNECTION_TIME_OUT = 4000;
+const int CONNECTION_TIME_OUT = 20000;
 
 void wifiPannelTick()
 {
@@ -47,7 +47,7 @@ void wifiPannelTick()
                 if (WiFi.status() != WL_CONNECTED)
                 {
                     const char *ssid = "Unknown";
-                    const char *password = "1234567890asdf";
+                    const char *password = "1234567890asdf---";
 
                     WiFi.begin(ssid, password);
                     WiFi.setSleep(false);
@@ -59,16 +59,14 @@ void wifiPannelTick()
                     {
                         delay(50);
                         time += 50;
-                        //tft->print(".");
-
-                        //ttgo->tft->fillScreen(TFT_BLACK);
+                        
                         int r = 5;
                         int Dx = cos(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         int Dy = sin(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         if (time % 700 == 0)
                         {
                             Serial.println(".");
-                            col += random() / 1000000;
+                            col += random() / 10000000;
                         }
                         ttgo->tft->fillCircle(TFT_HEIGHT / 2 + Dx, TFT_WIDTH / 2 + Dy, r, col);
                     }
@@ -76,6 +74,7 @@ void wifiPannelTick()
                     if (time >= CONNECTION_TIME_OUT)
                     {
                         WiFi.disconnect();
+                        Serial.println("time out");
                     }
                 }
                 else
@@ -149,12 +148,12 @@ void wifiPannelTick()
                         jsmn_parser p;
                         jsmn_init(&p);
 
-                        const int c = 100;
+                        const int TOK_N = 100;
                         jsmntok_t t[TOK_N]; /* We expect no more than TOK_N JSON tokens */
 
                         int r = jsmn_parse(&p, recived, strlen(recived), t, TOK_N);
 
-                        serial.printf("encontre %d tokens", r);
+                        //serial.printf("encontre %d tokens", r);
                     }
                 }
             },

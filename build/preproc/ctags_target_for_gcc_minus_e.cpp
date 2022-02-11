@@ -4,7 +4,7 @@
 # 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
 
 // apps
-
+# 7 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
 # 8 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
 # 9 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
 # 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino" 2
@@ -81,6 +81,7 @@ void setup()
   drawn = false;
 
   Serial.println("Setup done!!");
+
 }
 
 // to rember after release (used at onfingerUp call)
@@ -291,6 +292,8 @@ void loop()
     case wifiPannel:
       wifiPannelTick();
       break;
+    case joke:
+      jokeTick();
     }
   }
   else
@@ -387,8 +390,6 @@ void loop()
 
 
 
-
-# 8 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
 int lastDrawnTime = -1;
 
 void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds)
@@ -419,6 +420,12 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
         invalidate = true;
     }
 }
+# 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appJoke.ino"
+//https://icanhazdadjoke.com/slack
+
+
+# 5 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appJoke.ino" 2
+# 6 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appJoke.ino" 2
 # 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino"
 
 # 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino" 2
@@ -897,3 +904,6 @@ void TeamScoresTick()
 # 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\logger.ino"
 # 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\ttgoGlovalDeclarations.ino"
 # 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\utils.ino"
+
+# 3 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\utils.ino" 2
+# 4 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\utils.ino" 2

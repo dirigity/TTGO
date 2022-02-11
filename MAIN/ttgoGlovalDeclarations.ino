@@ -49,6 +49,7 @@ typedef enum
     morse,
     calendar,
     wifiPannel,
+    joke,
     turnOff,
 
 } tApp;

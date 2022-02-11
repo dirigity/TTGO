@@ -5,7 +5,6 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
 
 // apps
-
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWatch.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appTimer.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appControlPannel.ino"
@@ -16,18 +15,19 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appJoke.ino"
 
 #line 18 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void setup();
-#line 91 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+#line 92 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void onfingerDown(int x, int y);
-#line 110 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+#line 111 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void onfingerDrag(int x, int y);
-#line 143 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+#line 144 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void onfingerUp(int x, int y);
-#line 166 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+#line 167 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void ManageTouch();
-#line 196 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
+#line 197 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\MAIN.ino"
 void loop();
 #line 10 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appDataMonitor.ino"
 void dataMonitorTick(int year, int month, int day, int hour, int minute, int seconds);
@@ -109,6 +109,7 @@ void setup()
   drawn = false;
 
   Serial.println("Setup done!!");
+
 }
 
 // to rember after release (used at onfingerUp call)
@@ -319,6 +320,8 @@ void loop()
     case wifiPannel:
       wifiPannelTick();
       break;
+    case joke:
+      jokeTick();
     }
   }
   else
@@ -1151,6 +1154,75 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
 }
 
 #endif
+#line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appJoke.ino"
+//https://icanhazdadjoke.com/slack
+
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\buttonSistem.ino"
+
+#ifndef appJoke
+#define appJoke
+
+char jokeStr[100] = "press to fetch";
+
+void fetchJoke(int x, int y)
+{
+    Serial.println("joke fetching");
+
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        const char *apiUrl = "https://icanhazdadjoke.com/slack";
+        const char *certificate =
+            "-----BEGIN CERTIFICATE-----\n"
+            "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\n"
+            "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\n"
+            "VQQDExlCYWx0aW1vcmUgQ3liZXJUcnVzdCBSb290MB4XDTAwMDUxMjE4NDYwMFoX\n"
+            "DTI1MDUxMjIzNTkwMFowWjELMAkGA1UEBhMCSUUxEjAQBgNVBAoTCUJhbHRpbW9y\n"
+            "ZTETMBEGA1UECxMKQ3liZXJUcnVzdDEiMCAGA1UEAxMZQmFsdGltb3JlIEN5YmVy\n"
+            "VHJ1c3QgUm9vdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKMEuyKr\n"
+            "mD1X6CZymrV51Cni4eiVgLGw41uOKymaZN+hXe2wCQVt2yguzmKiYv60iNoS6zjr\n"
+            "IZ3AQSsBUnuId9Mcj8e6uYi1agnnc+gRQKfRzMpijS3ljwumUNKoUMMo6vWrJYeK\n"
+            "mpYcqWe4PwzV9/lSEy/CG9VwcPCPwBLKBsua4dnKM3p31vjsufFoREJIE9LAwqSu\n"
+            "XmD+tqYF/LTdB1kC1FkYmGP1pWPgkAx9XbIGevOF6uvUA65ehD5f/xXtabz5OTZy\n"
+            "dc93Uk3zyZAsuT3lySNTPx8kmCFcB5kpvcY67Oduhjprl3RjM71oGDHweI12v/ye\n"
+            "jl0qhqdNkNwnGjkCAwEAAaNFMEMwHQYDVR0OBBYEFOWdWTCCR1jMrPoIVDaGezq1\n"
+            "BE3wMBIGA1UdEwEB/wQIMAYBAf8CAQMwDgYDVR0PAQH/BAQDAgEGMA0GCSqGSIb3\n"
+            "DQEBBQUAA4IBAQCFDF2O5G9RaEIFoN27TyclhAO992T9Ldcw46QQF+vaKSm2eT92\n"
+            "9hkTI7gQCvlYpNRhcL0EYWoSihfVCr3FvDB81ukMJY2GQE/szKN+OMY3EU/t3Wgx\n"
+            "jkzSswF07r51XgdIGn9w/xZchMB5hbgF/X++ZRGjD8ACtPhSNzkE1akxehi/oCr0\n"
+            "Epn3o0WC4zxe9Z2etciefC7IpJ5OCBRLbf1wbWsaY71k5h+3zvDyny67G7fyUIhz\n"
+            "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\n"
+            "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\n"
+            "-----END CERTIFICATE-----";
+
+            char *recived = fetch(apiUrl, certificate);
+
+        { // parse scope
+
+            jsmn_parser p;
+            jsmn_init(&p);
+
+            const int TOK_N = 20;
+            jsmntok_t t[TOK_N]; /* We expect no more than TOK_N JSON tokens */
+
+            int r = jsmn_parse(&p, recived, strlen(recived), t, TOK_N);
+
+            Serial.printf("encontre %d tokens en %s \n", r, recived);
+        }
+    }
+}
+
+void jokeTick()
+{
+
+    if (!drawn)
+    {
+        createButton(FULL_SCREEN_BOX, onUp, fetchJoke, TFT_WHITE, jokeStr, TFT_BLACK);
+    }
+}
+
+#endif
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\appLauncher.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino"
@@ -1162,7 +1234,7 @@ void dataMonitorTick(int year, int month, int day, int hour, int minute, int sec
 // launcher app
 int selected = -1;
 
-const int appCount = 14;
+const int appCount = 15;
 const int skipedApps = 2;
 
 const char *AppToString[appCount] = {
@@ -1180,6 +1252,7 @@ const char *AppToString[appCount] = {
     "morse",
     "calendar",
     "wifiPannel",
+    "joke",
     "turnOff"};
 
 void goToLauncher()
@@ -2422,14 +2495,9 @@ curl -H "Accept: text/plain" https://icanhazdadjoke.com/ <- lo mas importante
 
 */
 #include <WiFi.h>
+#include "jsmn-master\jsmn.h"
 
-const char *ssid = "Unknown";
-const char *password = "1234567890asdf";
-
-const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 3600;
-const int daylightOffset_sec = 3600;
-const int CONNECTION_TIME_OUT = 4000;
+const int CONNECTION_TIME_OUT = 20000;
 
 void wifiPannelTick()
 {
@@ -2450,34 +2518,27 @@ void wifiPannelTick()
             {
                 if (WiFi.status() != WL_CONNECTED)
                 {
+                    const char *ssid = "Unknown";
+                    const char *password = "1234567890asdf---";
+
                     WiFi.begin(ssid, password);
                     WiFi.setSleep(false);
                     int time = 0;
                     int col = random();
                     ttgo->tft->fillScreen(TFT_BLACK);
 
-                    Serial.println(WiFi.status());
-                    int aviableNetworksN = WiFi.scanNetworks();
-                    Serial.printf("Wifises(%d): \n", aviableNetworksN);
-                    for (int i = 0; i < aviableNetworksN; i++)
-                    {
-                        Serial.println(WiFi.SSID(i));
-                    }
-
                     while (WiFi.status() != WL_CONNECTED && time < CONNECTION_TIME_OUT)
                     {
                         delay(50);
                         time += 50;
-                        //tft->print(".");
-
-                        //ttgo->tft->fillScreen(TFT_BLACK);
+                        
                         int r = 5;
                         int Dx = cos(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         int Dy = sin(millis() / 1000.) * (20 + 90 * cos(millis() / 600.));
                         if (time % 700 == 0)
                         {
-                            Serial.print(".");
-                            col += random() / 1000000;
+                            Serial.println(".");
+                            col += random() / 10000000;
                         }
                         ttgo->tft->fillCircle(TFT_HEIGHT / 2 + Dx, TFT_WIDTH / 2 + Dy, r, col);
                     }
@@ -2485,6 +2546,7 @@ void wifiPannelTick()
                     if (time >= CONNECTION_TIME_OUT)
                     {
                         WiFi.disconnect();
+                        Serial.println("time out");
                     }
                 }
                 else
@@ -2501,6 +2563,9 @@ void wifiPannelTick()
             {
                 if (WiFi.status() == WL_CONNECTED)
                 {
+                    const char *ntpServer = "pool.ntp.org";
+                    const long gmtOffset_sec = 3600;
+                    const int daylightOffset_sec = 3600;
                     bool gotTime = false;
                     while (!gotTime)
                     {
@@ -2520,8 +2585,48 @@ void wifiPannelTick()
         createButton(
             trelloButton, onUp, [](int x, int y)
             {
+                Serial.println("trello fetching");
+
                 if (WiFi.status() == WL_CONNECTED)
                 {
+                    const char *apiUrl = "https://trello.com/b/OA8Jy4rW.json";
+                    const char *certificate =
+                        "-----BEGIN CERTIFICATE-----\n"
+                        "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\n"
+                        "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\n"
+                        "d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBD\n"
+                        "QTAeFw0wNjExMTAwMDAwMDBaFw0zMTExMTAwMDAwMDBaMGExCzAJBgNVBAYTAlVT\n"
+                        "MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\n"
+                        "b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IENBMIIBIjANBgkqhkiG\n"
+                        "9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4jvhEXLeqKTTo1eqUKKPC3eQyaKl7hLOllsB\n"
+                        "CSDMAZOnTjC3U/dDxGkAV53ijSLdhwZAAIEJzs4bg7/fzTtxRuLWZscFs3YnFo97\n"
+                        "nh6Vfe63SKMI2tavegw5BmV/Sl0fvBf4q77uKNd0f3p4mVmFaG5cIzJLv07A6Fpt\n"
+                        "43C/dxC//AH2hdmoRBBYMql1GNXRor5H4idq9Joz+EkIYIvUX7Q6hL+hqkpMfT7P\n"
+                        "T19sdl6gSzeRntwi5m3OFBqOasv+zbMUZBfHWymeMr/y7vrTC0LUq7dBMtoM1O/4\n"
+                        "gdW7jVg/tRvoSSiicNoxBN33shbyTApOB6jtSj1etX+jkMOvJwIDAQABo2MwYTAO\n"
+                        "BgNVHQ8BAf8EBAMCAYYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUA95QNVbR\n"
+                        "TLtm8KPiGxvDl7I90VUwHwYDVR0jBBgwFoAUA95QNVbRTLtm8KPiGxvDl7I90VUw\n"
+                        "DQYJKoZIhvcNAQEFBQADggEBAMucN6pIExIK+t1EnE9SsPTfrgT1eXkIoyQY/Esr\n"
+                        "hMAtudXH/vTBH1jLuG2cenTnmCmrEbXjcKChzUyImZOMkXDiqw8cvpOp/2PV5Adg\n"
+                        "06O/nVsJ8dWO41P0jmP6P6fbtGbfYmbW0W5BjfIttep3Sp+dWOIrWcBAI+0tKIJF\n"
+                        "PnlUkiaY4IBIqDfv8NZ5YBberOgOzW6sRBc4L0na4UU+Krk2U886UAb3LujEV0ls\n"
+                        "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\n"
+                        "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n"
+                        "-----END CERTIFICATE-----";
+                    char *recived = fetch(apiUrl, certificate);
+
+                    { // parse scope
+
+                        jsmn_parser p;
+                        jsmn_init(&p);
+
+                        const int TOK_N = 100;
+                        jsmntok_t t[TOK_N]; /* We expect no more than TOK_N JSON tokens */
+
+                        int r = jsmn_parse(&p, recived, strlen(recived), t, TOK_N);
+
+                        //serial.printf("encontre %d tokens", r);
+                    }
                 }
             },
             enabledIfWifiColor, "sync trello", TFT_BLACK);
@@ -2873,6 +2978,7 @@ typedef enum
     morse,
     calendar,
     wifiPannel,
+    joke,
     turnOff,
 
 } tApp;
@@ -2882,6 +2988,8 @@ tApp app = watch;
 
 #line 1 "c:\\Users\\Jaime\\Desktop\\TTGO\\MAIN\\utils.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\ttgoGlovalDeclarations.ino"
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 #ifndef Utils
 #define Utils
@@ -2975,6 +3083,30 @@ typedef enum
     button
 } tInterrupt;
 tInterrupt interrupt = none;
+
+char *fetch(const char *url, const char *certificate)
+{
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        HTTPClient http;
+        http.begin(url, certificate);
+        int httpCode = http.GET();
+        if (httpCode > 0)
+        {
+            String payload = http.getString();
+            Serial.println(httpCode);
+            Serial.println(payload);
+        }
+
+        else
+        {
+            Serial.println("Error on HTTP request");
+        }
+
+        http.end();
+    }
+    return "";
+}
 
 void destructurateRGB(int col, int &r, int &g, int &b)
 {

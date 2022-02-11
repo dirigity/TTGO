@@ -8,7 +8,7 @@
 // launcher app
 int selected = -1;
 
-const int appCount = 14;
+const int appCount = 15;
 const int skipedApps = 2;
 
 const char *AppToString[appCount] = {
@@ -26,6 +26,7 @@ const char *AppToString[appCount] = {
     "morse",
     "calendar",
     "wifiPannel",
+    "joke",
     "turnOff"};
 
 void goToLauncher()

@@ -236,16 +236,6 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\MAIN.ino.cpp.o: \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\Ticker\src/Ticker.h \
  C:\Users\Jaime\Desktop\TTGO\MAIN\buttonSistem.ino \
  C:\Users\Jaime\Desktop\TTGO\MAIN\utils.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\logger.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appWatch.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appTimer.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appControlPannel.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appLauncher.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino \
- C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFi.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/IPv6Address.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiType.h \
@@ -302,4 +292,55 @@ c:\Users\Jaime\Desktop\TTGO\build\sketch\MAIN.ino.cpp.o: \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/Server.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiUdp.h \
  C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/Udp.h \
- C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/cbuf.h
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\cores\esp32/cbuf.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\HTTPClient\src/HTTPClient.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFi\src/WiFiClient.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFiClientSecure\src/WiFiClientSecure.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1\libraries\WiFiClientSecure\src/ssl_client.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/platform.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/port/include/mbedtls/esp_config.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/config.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/check_config.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/port/include/esp_mem.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/check_config.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/platform_time.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/net.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/net_sockets.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ssl.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/bignum.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ecp.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ssl_ciphersuites.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/pk.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/md.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/rsa.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ecdsa.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/cipher.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/platform_util.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/x509_crt.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/x509.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/asn1.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/x509_crl.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/dhm.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ecdh.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/debug.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ssl.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/entropy.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/sha512.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/ctr_drbg.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/aes.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/port/include/aes_alt.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/port/include/aes/esp_aes.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/hal/include/hal/aes_types.h \
+ C:\Users\Jaime\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.0-rc1/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/error.h \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\logger.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appWatch.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appTimer.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appControlPannel.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appLauncher.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appCalculator.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appOcr.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\jsmn-master\jsmn.h \
+ C:\Users\Jaime\Desktop\TTGO\MAIN\appJoke.ino

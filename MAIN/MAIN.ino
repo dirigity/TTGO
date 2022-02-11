@@ -13,6 +13,7 @@
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appBaseConversion.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appCalendario.ino"
 #include "C:\Users\Jaime\Desktop\TTGO\MAIN\appWifiPannel.ino"
+#include "C:\Users\Jaime\Desktop\TTGO\MAIN\appJoke.ino"
 
 void setup()
 {
@@ -290,6 +291,8 @@ void loop()
     case wifiPannel:
       wifiPannelTick();
       break;
+    case joke:
+      jokeTick();
     }
   }
   else
